@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/E-commerce_Platform_Datasource
+    username: username
+    password: password
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    enabled: false
+
+jwt:
+  issuer: auth-service
+  access:
+    secret: 5ba1791dedb87fec844cd4c57bcf5c3afeb0379f4b67347a438bc559b429a52c
+    ttl: 15m
+  refresh:
+    secret: 4cfa6d5afcaef760b96163d923c05a4d7c85957acbca06649d28b21576859f1c
+    ttl: 1d
+  service:
+    secret: 057f34884f6434c80285a39344a5a47dfd3a571a0ca3e8a65768e76ffc6bb660
+    ttl: 1m
+
+
+user:
+  service:
+    url: http://localhost:8084/api/v1/users

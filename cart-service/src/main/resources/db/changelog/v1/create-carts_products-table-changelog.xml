@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <changeSet id="v1-create-carts_products-table" author="Anton_Ivanov">
+        <preConditions onFail="CONTINUE" onFailMessage="Table carts_products already exist">
+            <not>
+                <tableExists tableName="carts_products"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="carts_products">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="cart_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="carts_products" baseColumnNames="cart_id"
+                                 constraintName="cart_id_fk"
+                                 referencedTableName="carts"
+                                 referencedColumnNames="id"
+        />
+
+        <addForeignKeyConstraint baseTableName="carts_products" baseColumnNames="product_id"
+                                 constraintName="product_id_fk"
+                                 referencedTableName="products"
+                                 referencedColumnNames="id"
+        />
+
+        <rollback>
+            <dropTable tableName="carts_products"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

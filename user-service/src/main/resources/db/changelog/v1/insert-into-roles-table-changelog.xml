@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="v1-insert-into-roles-table" author="Anton_Ivanov">
+
+        <preConditions onFail="CONTINUE" onFailMessage="Table roles not exists or not empty">
+            <tableExists tableName="roles"/>
+            <tableIsEmpty tableName="roles"/>
+        </preConditions>
+
+        <insert tableName="roles">
+            <column name="id">4b3a6140-02a8-46b6-8785-a040a651445f</column>
+            <column name="name">ROLE_USER</column>
+        </insert>
+
+        <rollback>
+            <sql>
+                truncate table roles
+            </sql>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="v1-insert-into-carts_products-table" author="Anton_Ivanov">
+
+        <preConditions onFail="CONTINUE" onFailMessage="Table carts_products not exists or not empty">
+            <tableExists tableName="carts_products"/>
+            <tableIsEmpty tableName="carts_products"/>
+        </preConditions>
+
+        <loadData tableName="carts_products"
+                  file="data/carts-products-table-data.csv"
+                  relativeToChangelogFile="true"
+                  encoding="UTF-8">
+            <column name="id" type="uuid"/>
+            <column name="cart_id" type="uuid"/>
+            <column name="product_id" type="uuid"/>
+            <column name="quantity" type="int"/>
+        </loadData>
+
+        <rollback>
+            <sql>
+                truncate table carts_products
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

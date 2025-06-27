@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="v1-create-carts-table" author="Anton_Ivanov">
+        <preConditions onFail="CONTINUE" onFailMessage="Table carts already exist">
+            <not>
+                <tableExists tableName="carts"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="carts">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="carts" baseColumnNames="user_id"
+                                 constraintName="user_id_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+        />
+
+        <rollback>
+            <dropTable tableName="carts"/>
+        </rollback>
+    </changeSet>
+
+
+</databaseChangeLog>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="v1-insert-data-into-products-table" author="Anton Ivanov">
+        <preConditions onFail="CONTINUE" onFailMessage="Table products already exists or table is not empty">
+            <tableExists tableName="products"/>
+            <tableIsEmpty tableName="products"/>
+        </preConditions>
+
+        <loadData
+                tableName="products"
+                file="data/products-table-data.csv"
+                relativeToChangelogFile="true"
+                separator=","
+                encoding="UTF-8">
+
+            <column name="id" type="uuid"/>
+            <column name="name" type="string"/>
+            <column name="description" type="string"/>
+            <column name="price" type="numeric"/>
+        </loadData>
+
+        <rollback>
+            <sql>
+                truncate table products
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

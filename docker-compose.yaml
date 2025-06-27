@@ -1,0 +1,138 @@
+services:
+
+  datasource:
+    image: postgres:17-alpine
+    container_name: E-commerce_Platform_Datasource_Container
+    environment:
+      POSTGRES_DB: E-commerce_Platform_Datasource
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U username -d E-commerce_Platform_Datasource" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - e-commerce_platform_data:/var/lib/postgresql/data
+
+  product-service:
+    container_name: Product-Service_Container
+    build:
+      context: product-service/.
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    depends_on:
+      datasource:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+
+  cart-service:
+    container_name: Cart-Service_Container
+    build:
+      context: cart-service/.
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      datasource:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    environment:
+      PRODUCT_SERVICE_URL: http://product-service:8081/api/v1/products
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+
+  user-service:
+    container_name: User-Service_Container
+    build:
+      context: user-service/.
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8084/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      datasource:
+          condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+
+  auth-service:
+    container_name: Auth-Service_Container
+    build:
+      context: auth-service/.
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      datasource:
+        condition: service_healthy
+    environment:
+      USER_SERVICE_URL: http://user-service:8084/api/v1/users
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+
+  page-service:
+    container_name: Page-Service_Container
+    build:
+      context: page-service/.
+      dockerfile: Dockerfile
+    ports:
+        - "8181:8181"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8181/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      datasource:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+
+volumes:
+  e-commerce_platform_data:
