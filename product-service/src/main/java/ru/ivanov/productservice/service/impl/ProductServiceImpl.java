@@ -1,6 +1,8 @@
 package ru.ivanov.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -25,11 +27,11 @@ import ru.ivanov.productservice.service.ProductService;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.ivanov.productservice.util.MessageUtils.PRODUCT_NOT_FOUND_WITH_ID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -39,8 +41,11 @@ public class ProductServiceImpl implements ProductService {
     private final CacheManager cacheManager;
 
     @Override
-    @CachePut(value = "products", key = "#result.id")
-    @CacheEvict(value = "productQueries", allEntries = true)
+    @Caching(put = {
+                @CachePut(value = "products", key = "#result.id"),
+                @CachePut(value = "productExistence", key = "#result.id", condition = "#result != null")},
+            evict = @CacheEvict(value = "productQueries", allEntries = true)
+    )
     @Transactional
     public ProductDto createProduct(CreateProductRequest request) {
         Product product = productMapper.toEntity(request);
@@ -51,22 +56,41 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductDto> getProductsByID(List<UUID> productsIDs) {
-        Map<UUID, ProductDto> cache = Objects.requireNonNull(cacheManager.getCache("products"))
-                .get(productsIDs, () -> loadProductsBatch(productsIDs));
+        if (productsIDs == null || productsIDs.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        return productsIDs.stream()
-                .map(id -> Objects.requireNonNull(cache).getOrDefault(id, null))
-                .filter(Objects::nonNull)
-                .toList();
+        Cache cache = cacheManager.getCache("products");
+
+        if (cache == null) {
+            return loadProductsBatch(productsIDs);
+        }
+
+        List<ProductDto> products = new ArrayList<>();
+        List<UUID> missingIDs = new ArrayList<>();
+
+        for (UUID id : productsIDs) {
+            ProductDto cachedProduct = cache.get(id, ProductDto.class);
+            if (cachedProduct != null) {
+                products.add(cachedProduct);
+            } else {
+                missingIDs.add(id);
+            }
+        }
+
+        if (!missingIDs.isEmpty()) {
+            List<ProductDto> missingProducts = loadProductsBatch(missingIDs);
+            products.addAll(missingProducts);
+            missingProducts.forEach(product -> cache.put(product.id(), product));
+        }
+
+        return products;
     }
 
-    private Map<UUID, ProductDto> loadProductsBatch(List<UUID> ids) {
+    private List<ProductDto> loadProductsBatch(List<UUID> ids) {
         return productRepository.findAllById(ids).stream()
                 .map(productMapper::toDto)
-                .collect(Collectors.toMap(
-                        ProductDto::id,
-                        Function.identity()
-                ));
+                .toList();
     }
 
     @Override
