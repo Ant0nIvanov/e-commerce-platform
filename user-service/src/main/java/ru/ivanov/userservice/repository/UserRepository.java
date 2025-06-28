@@ -1,5 +1,6 @@
 package ru.ivanov.userservice.repository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.ivanov.userservice.model.User;

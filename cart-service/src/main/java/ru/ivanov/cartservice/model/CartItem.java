@@ -17,17 +17,16 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
-//    private UUID cartId;
+    @Column(name = "cart_id")
+    private UUID cartId;
 
+    @Column(name = "product_id")
     private UUID productId;
 
     private int quantity = 0;
 
-    public CartItem(Cart cart, UUID productId) {
-        this.cart = cart;
+    public CartItem(UUID cartId, UUID productId) {
+        this.cartId = cartId;
         this.productId = productId;
     }
 

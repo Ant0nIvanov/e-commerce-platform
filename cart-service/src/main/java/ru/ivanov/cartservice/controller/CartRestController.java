@@ -36,7 +36,7 @@ public class CartRestController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        List<ProductInCartDto> products = cartService.getCart(userId);
+        List<ProductInCartDto> products = cartService.getCartWithItems(userId);
         return ResponseEntity.ok(products);
     }
 

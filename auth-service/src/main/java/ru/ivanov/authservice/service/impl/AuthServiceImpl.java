@@ -40,10 +40,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        String credentials = request.username() + ":" + request.password();
-        String base64Credentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-
-
         UserDto userDto = userClient.verifyCredentials(request);
 
         String accessToken = jwtUtils.generateAccessToken(userDto);

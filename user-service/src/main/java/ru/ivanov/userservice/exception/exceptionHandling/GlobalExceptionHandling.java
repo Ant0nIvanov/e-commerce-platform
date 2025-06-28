@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.ivanov.userservice.dto.response.ErrorResponse;
 import ru.ivanov.userservice.exception.RoleNotFoundException;
-import ru.ivanov.userservice.exception.UserAlreadyExistsException;
+import ru.ivanov.userservice.exception.UsernameIsTakenException;
 import ru.ivanov.userservice.exception.UserNotFoundException;
 
 import java.time.LocalDateTime;
@@ -18,9 +18,9 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RestControllerAdvice
 public class GlobalExceptionHandling {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ExceptionHandler(UsernameIsTakenException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(
-            UserAlreadyExistsException ex,
+            UsernameIsTakenException ex,
             HttpServletRequest request
     ) {
         ErrorResponse response = new ErrorResponse(

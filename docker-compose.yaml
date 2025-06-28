@@ -2,7 +2,7 @@ services:
 
   datasource:
     image: postgres:17-alpine
-    container_name: E-commerce_Platform_Datasource_Container
+    container_name: Datasource_Container
     environment:
       POSTGRES_DB: E-commerce_Platform_Datasource
       POSTGRES_USER: username

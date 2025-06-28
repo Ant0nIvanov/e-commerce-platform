@@ -4,6 +4,9 @@ server:
 spring:
   liquibase:
     enabled: false
+  web:
+    resources:
+      static-locations: classpath:/static/
 
   datasource:
     driver-class-name: ${SPRING_DATASOURCE_DRIVER}

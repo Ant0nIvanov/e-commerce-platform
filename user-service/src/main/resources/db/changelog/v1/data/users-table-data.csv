@@ -1,3 +1,3 @@
 id,first_name,last_name,username,password
-376760a1-a107-4dc2-aadd-7124c58736d9,Антон,Иванов,anton111,test
-97b0de87-9279-4819-b5ca-92a38aa9a98e,Влад,Мишустин,vlad222,test
+376760a1-a107-4dc2-aadd-7124c58736d9,Антон,Иванов,anton111,$2a$12$2ixNH0j4pye1QM22dR3RN.3En5XYSWLD10bXrot9SuWSlURg7RgMC
+97b0de87-9279-4819-b5ca-92a38aa9a98e,Влад,Мишустин,vlad222,$2a$12$2ixNH0j4pye1QM22dR3RN.3En5XYSWLD10bXrot9SuWSlURg7RgMC

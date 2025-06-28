@@ -2,6 +2,9 @@ package ru.ivanov.cartservice.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -15,6 +18,7 @@ import ru.ivanov.cartservice.exception.ExternalServiceUnavailableException;
 import ru.ivanov.cartservice.exception.ProductServiceException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static ru.ivanov.cartservice.util.MessageUtils.PRODUCT_SERVICE_IS_CURRENTLY_UNAVAILABLE;
@@ -27,6 +31,7 @@ public class ProductClient {
     public String BASE_URL;
 
     public final RestTemplate restTemplate;
+    public final CacheManager cacheManager;
 
     public List<ProductDto> getProducts(List<UUID> productsIDs) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -43,6 +48,7 @@ public class ProductClient {
         return response.getBody();
     }
 
+//    @Cacheable(value = "productsExists", key = "#productId") // если товар удалится надо удалить
     public boolean isProductExists(UUID productId) {
         String url = UriComponentsBuilder.fromUriString(BASE_URL)
                 .path("/{productId}/exists")
