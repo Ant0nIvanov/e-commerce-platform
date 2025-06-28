@@ -9,7 +9,7 @@
 ### Основные технологии
 *   **Язык:** Java 21
 *   **Фреймворк:** Spring Boot 3.x, Spring Security
-*   **Базы данных:** PostgreSQL (для каждого сервиса)
+*   **Базы данных:** PostgreSQL
 *   **ORM:** Spring Data JPA (Hibernate)
 *   **Аутентификация:** JWT
 *   **Межсервисная коммуникация:** REST API, Spring RestTemplate
