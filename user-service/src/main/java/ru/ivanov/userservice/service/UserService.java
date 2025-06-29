@@ -9,7 +9,6 @@ import java.util.UUID;
 public interface UserService {
     UserDto createUser(RegistrationRequest request);
 
-
     UserDto verifyCredentials(String username, String password);
 
     UserDto getUser(UUID userId);

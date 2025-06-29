@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, UUID> {
-    @EntityGraph(attributePaths = "items")
     Optional<Cart> findCartByUserId(UUID userId);
 
     void deleteByUserId(UUID userId);

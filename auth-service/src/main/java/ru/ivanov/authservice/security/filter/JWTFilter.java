@@ -1,4 +1,4 @@
-package ru.ivanov.userservice.security.filter;
+package ru.ivanov.authservice.security.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -15,9 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.ivanov.userservice.security.UserDetailsImpl;
-import ru.ivanov.userservice.utils.JWTUtils;
-
+import ru.ivanov.authservice.security.UserDetailsImpl;
+import ru.ivanov.authservice.util.JWTUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +46,7 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-        private String extractTokenFromAuthHeader(HttpServletRequest request) {
+    private String extractTokenFromAuthHeader(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
@@ -63,41 +62,16 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private Authentication authenticateToken(String token) {
-        if (jwtUtils.isServiceToken(token)) {
-            return handleServiceToken(token);
-        } else if (jwtUtils.isAccessToken(token)) {
+        if (jwtUtils.isAccessToken(token)) {
             return handleAccessToken(token);
         }
         throw new JwtException("Unsupported JWT type");
     }
 
-    private Authentication handleServiceToken(String serviceToken) {
-        Claims claims = jwtUtils.validateAndParseServiceToken(serviceToken);
-        return createServiceAuthentication(claims);
-    }
 
     private Authentication handleAccessToken(String accessToken) {
         Claims claims = jwtUtils.validateAndParseAccessToken(accessToken);
         return createUsernamePasswordAuthentication(claims);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Authentication createServiceAuthentication(Claims claims) {
-        String issuer = claims.getIssuer();
-        UUID userId = null;
-        Object userIdClaim = claims.get("userId");
-
-        if (userIdClaim != null) {
-            userId = UUID.fromString(userIdClaim.toString());
-        }
-
-        List<String> roles = claims.get("roles", List.class);
-        List<GrantedAuthority> authorities = roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        UserDetailsImpl userDetails = new UserDetailsImpl(userId, issuer, authorities);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }
 
     @SuppressWarnings("unchecked")

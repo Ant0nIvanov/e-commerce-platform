@@ -2,7 +2,11 @@ package ru.ivanov.authservice.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ivanov.authservice.client.UserServiceClient;
 import ru.ivanov.authservice.dto.UserDto;
 import ru.ivanov.authservice.dto.UserSafeDto;
@@ -11,76 +15,93 @@ import ru.ivanov.authservice.dto.request.RefreshTokenRequest;
 import ru.ivanov.authservice.dto.request.RegistrationRequest;
 import ru.ivanov.authservice.dto.response.AuthResponse;
 import ru.ivanov.authservice.dto.response.JwtResponse;
+import ru.ivanov.authservice.exception.AuthException;
 import ru.ivanov.authservice.mapper.UserDtoMapper;
+import ru.ivanov.authservice.model.RefreshToken;
+import ru.ivanov.authservice.model.enums.RefreshTokenStatus;
 import ru.ivanov.authservice.service.AuthService;
+import ru.ivanov.authservice.service.RefreshTokenService;
 import ru.ivanov.authservice.util.JWTUtils;
 
-import java.util.Base64;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private final RefreshTokenService refreshTokenService;
     private final UserServiceClient userClient;
     private final JWTUtils jwtUtils;
     private final UserDtoMapper userDtoMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public AuthResponse register(RegistrationRequest request) {
-        UserDto createdUserDto =  userClient.createNewUser(request);
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        String accessToken = jwtUtils.generateAccessToken(createdUserDto);
-        String refreshToken = jwtUtils.generateRefreshToken(createdUserDto);
+        UserDto createdUser =  userClient.createNewUser(request);
 
-        UserSafeDto userSafeDto = userDtoMapper.toSafeDto(createdUserDto);
+        String accessToken = jwtUtils.generateAccessToken(createdUser);
+        RefreshToken refreshToken = jwtUtils.generateRefreshToken(createdUser);
 
-        return new AuthResponse(userSafeDto, accessToken, refreshToken);
+        refreshTokenService.save(refreshToken);
+
+        UserSafeDto userSafeDto = userDtoMapper.toSafeDto(createdUser);
+
+        return new AuthResponse(userSafeDto, accessToken, refreshToken.getToken());
     }
 
     @Override
+    @Transactional
     public AuthResponse login(LoginRequest request) {
-        UserDto userDto = userClient.verifyCredentials(request);
+        UserDto user = userClient.verifyCredentials(request);
 
-        String accessToken = jwtUtils.generateAccessToken(userDto);
-        String refreshToken = jwtUtils.generateRefreshToken(userDto);
+        String accessToken = jwtUtils.generateAccessToken(user);
+        RefreshToken refreshToken = jwtUtils.generateRefreshToken(user);
 
-        UserSafeDto userSafeDto = userDtoMapper.toSafeDto(userDto);
-        return new AuthResponse(userSafeDto, accessToken, refreshToken);
+        refreshTokenService.revokeAllUserTokens(user.id());
+        refreshTokenService.save(refreshToken);
+
+        UserSafeDto userSafeDto = userDtoMapper.toSafeDto(user);
+        return new AuthResponse(userSafeDto, accessToken, refreshToken.getToken());
     }
 
     @Override
-    public JwtResponse refreshToken(RefreshTokenRequest request) {
+    @Transactional
+    public JwtResponse refresh(RefreshTokenRequest request) {
+        log.info("refresh");
         String oldRefreshToken = request.refreshToken();
-        //валидация
-        //    if (!tokenProvider.validateTokenStructure(refreshToken)) {
-//        throw new InvalidTokenException("Invalid token structure");
-//    }
 
+        RefreshTokenStatus status = refreshTokenService.getTokenStatus(oldRefreshToken);
 
-        // Проверка существования refresh токена
-//        if (!refreshTokenService.existsByToken(oldRefreshToken)) {
-//            throw new AuthException("Переданный refresh-токен не действителен");
-//        }
+        if (status != RefreshTokenStatus.ACTIVE) {
+            throw new AuthException("Недействительный токен. Статус токен : " + status.name());
+        }
 
-        //    // 2. Проверка отзыва токена
-//        if (refreshTokenService.isTokenRevoked(refreshToken)) {
-//        throw new TokenRevokedException("Token was revoked");
-//    }
-
-        UUID userId = jwtUtils.extractUserIdFromRefreshToken(oldRefreshToken);
+        UUID userId = jwtUtils.validateRefreshTokenAndExtractUserId(oldRefreshToken);
 
         UserDto userDto = userClient.getUserById(userId);
 
-        // Генерация новых токенов
-        String accessToken = jwtUtils.generateAccessToken(userDto);
-        String refreshToken = jwtUtils.generateRefreshToken(userDto);
+        String newAccessToken = jwtUtils.generateAccessToken(userDto);
+        RefreshToken newRefreshToken = jwtUtils.generateRefreshToken(userDto);
 
-        // Удаление старого refresh токена и сохранение нового
-//        refreshTokenService.deleteByToken(oldRefreshToken);
-//        refreshTokenService.save(new RefreshToken(refreshToken, userDetails.getId()));
+        refreshTokenService.rotateToken(oldRefreshToken, newRefreshToken);
 
-        // Возврат новых токенов
-        return new JwtResponse(accessToken, refreshToken);
+        return new JwtResponse(newAccessToken, newRefreshToken.getToken());
+    }
+
+    @Override
+    @Transactional
+    public void logout(String token) {
+        refreshTokenService.findByToken(token)
+                .ifPresent(refreshToken -> {
+                    if (refreshToken.isRevoked()) {
+                        return;
+                    }
+
+                    refreshTokenService.revokeToken(refreshToken.getToken());
+                });
     }
 }

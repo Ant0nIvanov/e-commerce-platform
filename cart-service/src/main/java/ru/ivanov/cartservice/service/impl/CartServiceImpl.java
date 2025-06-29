@@ -51,10 +51,6 @@ public class CartServiceImpl implements CartService {
         return cartMapper.toDto(cart);
     }
 
-//    public CartDto getCartDto(UUID userId) {
-//        Cart cart = getCartEntity(userId);
-//    }
-
     @Override
     @Transactional(readOnly = true)
     public List<ProductInCartDto> getCartWithItems(UUID userId) {
@@ -137,7 +133,7 @@ public class CartServiceImpl implements CartService {
 
         item.incrementQuantity();
 
-        cartItemService.save(item);
+//        cartItemService.save(item);
     }
 
     @Override
@@ -168,12 +164,12 @@ public class CartServiceImpl implements CartService {
             throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
         }
 
-        Cart cart = findCartByUserId(userId);
-
-        CartItem item = findItemInCartOrThrow(cart, productId);
-
-        cart.removeItem(item);
-        cartRepository.save(cart);
+//        Cart cart = findCartByUserId(userId);
+//
+//        CartItem item = findItemInCartOrThrow(cart, productId);
+//
+//        cart.removeItem(item);
+//        cartRepository.save(cart);
     }
 
     @Override

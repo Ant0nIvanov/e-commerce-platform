@@ -32,11 +32,11 @@ public class CartRestController {
     @GetMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ProductInCartDto>> getCart(
-            // todo изменить List<productInCartDto> на CartDto с содержанием листа
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
         List<ProductInCartDto> products = cartService.getCartWithItems(userId);
+        System.out.println(products);
         return ResponseEntity.ok(products);
     }
 

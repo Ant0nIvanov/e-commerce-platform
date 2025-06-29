@@ -44,14 +44,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto createUser(RegistrationRequest request) {
         if (userValidationService.existsByUsername(request.username())) {
-            throw new UsernameIsTakenException(USERNAME_IS_ALREADY_TAKEN);
+            throw new UsernameIsTakenException(USERNAME_IS_ALREADY_TAKEN.formatted(request.username()));
         }
 
         Role roleUser = roleService.findByName("ROLE_USER");
 
         User user = new User(
                 request.username(),
-                passwordEncoder.encode(request.password()),
+                request.hashedPassword(),
                 request.firstName(),
                 request.lastName(),
                 List.of(roleUser)
@@ -62,11 +62,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(
-            value = "userCredentials",
-            key = "T(ru.ivanov.userservice.utils.CacheUtils).generateCredentialsKey(#username, #password)",
-            unless = "#result == null"
-    )
+//    @Cacheable(
+//            value = "userCredentials",
+//            key = "T(ru.ivanov.userservice.utils.CacheUtils).generateCredentialsKey(#username, #hashedPassword)",
+//            unless = "#result == null"
+//    )
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('AUTH_SERVICE')")
     public UserDto verifyCredentials(String username, String password) {
@@ -96,9 +96,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @CachePut(value = "users", key = "#result.id")
-    @CacheEvict(
-            value = "userCredentials",
-            key = "T(ru.ivanov.userservice.utils.CacheUtils).generateCredentialsKey()")
+//    @CacheEvict(
+//            value = "userCredentials",
+//            key = "T(ru.ivanov.userservice.utils.CacheUtils).generateCredentialsKey()")
     @Transactional
     public UserDto updateUser(UUID userId, UpdateUserRequest request) {
         User user = findUserById(userId);
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
-        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setPassword(request.hashedPassword());
 
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);

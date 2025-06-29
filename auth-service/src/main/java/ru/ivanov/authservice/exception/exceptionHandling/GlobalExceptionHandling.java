@@ -1,63 +1,62 @@
-package ru.ivanov.userservice.exception.exceptionHandling;
+package ru.ivanov.authservice.exception.exceptionHandling;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.ivanov.userservice.dto.response.ErrorResponse;
-import ru.ivanov.userservice.exception.RoleNotFoundException;
-import ru.ivanov.userservice.exception.UsernameIsTakenException;
-import ru.ivanov.userservice.exception.UserNotFoundException;
+import ru.ivanov.authservice.dto.response.ErrorResponse;
+import ru.ivanov.authservice.exception.UsernameIsTakenException;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandling {
 
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(
+            JwtException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                request.getRequestURI(),
+                ex.getMessage(),
+                UNAUTHORIZED.value(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(UNAUTHORIZED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
+    }
+
     @ExceptionHandler(UsernameIsTakenException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(
+    public ResponseEntity<ErrorResponse> handleJwtException(
             UsernameIsTakenException ex,
             HttpServletRequest request
     ) {
-        ErrorResponse response = new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 request.getRequestURI(),
                 ex.getMessage(),
-                HttpStatus.CONFLICT.value(),
+                CONFLICT.value(),
                 LocalDateTime.now()
         );
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity
+                .status(CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(response);
+                .body(errorResponse);
     }
 
-    @ExceptionHandler({UserNotFoundException.class, RoleNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleNotFoundExceptions(
-            RuntimeException ex,
-            HttpServletRequest request
-    ) {
-        ErrorResponse response = new ErrorResponse(
-                request.getRequestURI(),
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                LocalDateTime.now()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(response);
-    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex,
             HttpServletRequest request
     ) {
-        log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 request.getRequestURI(),
                 ex.getMessage(),
