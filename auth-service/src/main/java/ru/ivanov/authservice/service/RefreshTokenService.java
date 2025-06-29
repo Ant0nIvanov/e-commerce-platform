@@ -10,9 +10,7 @@ import java.util.UUID;
 public interface RefreshTokenService {
     void save(RefreshToken refreshToken);
 
-    boolean existsByToken(String token);
-
-    boolean isTokenRevoked(String token);
+    Optional<RefreshToken> findByToken(String token);
 
     RefreshTokenStatus getTokenStatus(String token);
 
@@ -20,13 +18,9 @@ public interface RefreshTokenService {
 
     void revokeAllUserTokens(UUID userId);
 
-    Optional<RefreshToken> findByToken(String token);
+    int deleteRevokedTokensOlderThan(Instant cutoffDate);
 
-    void cleanExpiredTokens();
+    int deleteAllExpiredTokens();
 
     void revokeToken(String token);
-
-    void deleteByToken(String token);
-
-    void deleteRevokedTokensOlderThan(Instant minus);
 }

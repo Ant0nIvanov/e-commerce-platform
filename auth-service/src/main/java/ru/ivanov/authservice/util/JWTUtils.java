@@ -149,7 +149,7 @@ public class JWTUtils {
                     .getPayload();
 
         } catch (ExpiredJwtException e) {
-            throw new JwtException("Refresh token expired", e);
+            throw new JwtException("Access token expired", e);
         } catch (UnsupportedJwtException e) {
             throw new JwtException("Unsupported JWT format", e);
         } catch (MalformedJwtException e) {

@@ -45,11 +45,11 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/api/v1/auth/register").permitAll()
                         .requestMatchers(POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(POST, "/api/v1/auth/refresh").permitAll()
-                        .requestMatchers(POST, "/api/v1/auth/logout").authenticated()
+                        .requestMatchers(POST, "/api/v1/auth/logout").permitAll()
                         .requestMatchers(GET,"/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
                         .anyRequest().denyAll()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                );
+//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

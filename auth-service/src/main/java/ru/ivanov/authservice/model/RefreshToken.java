@@ -48,8 +48,4 @@ public class RefreshToken {
     public boolean isExpired() {
         return Instant.now().isAfter(expiryDate);
     }
-
-    public boolean isActive() {
-        return !revoked && !isExpired();
-    }
 }

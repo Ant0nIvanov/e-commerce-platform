@@ -21,6 +21,8 @@ import ru.ivanov.authservice.service.AuthService;
 import java.net.HttpCookie;
 import java.net.ResponseCache;
 import java.net.URI;
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 import static org.springframework.http.MediaType.*;
 
@@ -42,6 +44,7 @@ public class AuthRestController {
 
     @PostMapping("login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        System.out.println(Instant.now());
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok()
                 .contentType(APPLICATION_JSON)
@@ -57,12 +60,8 @@ public class AuthRestController {
     }
 
     @PostMapping("/logout")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
         authService.logout(request.refreshToken());
-
-        ResponseCookie cookie = ResponseCookie.from("refresh-token").build();
-
         return ResponseEntity.noContent().build();
     }
 }

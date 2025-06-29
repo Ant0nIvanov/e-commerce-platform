@@ -1,7 +1,9 @@
 package ru.ivanov.authservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ivanov.authservice.model.RefreshToken;
@@ -21,22 +23,18 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
+    //todo настроить кеширование, инвалидацию кеша
+
     @Override
     @Transactional
     public void save(RefreshToken refreshToken) {
         refreshTokenRepository.save(refreshToken);
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public boolean existsByToken(String token) {
-        return refreshTokenRepository.existsByToken(token);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isTokenRevoked(String token) {
-        return refreshTokenRepository.findByToken(token)
-                .map(RefreshToken::isRevoked)
-                .orElse(true); // Если токен не найден - считаем отозванным
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepository.findByToken(token);
     }
 
     @Override
@@ -61,23 +59,20 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return RefreshTokenStatus.ACTIVE;
     }
 
-    @Transactional
-    public void deleteByToken(String token) {
-        refreshTokenRepository.deleteByToken(token);
-    }
-
     @Override
-    public void deleteRevokedTokensOlderThan(Instant minus) {
-
-    }
-
-
     @Transactional
     public void rotateToken(String oldToken, RefreshToken newToken) {
         refreshTokenRepository.deleteByToken(oldToken);
         refreshTokenRepository.save(newToken);
     }
 
+    @Override
+    @Transactional
+    public int deleteRevokedTokensOlderThan(Instant cutoff) {
+        return refreshTokenRepository.deleteRevokedTokensOlderThan(cutoff);
+    }
+
+    @Override
     @Transactional
     public void revokeAllUserTokens(UUID userId) {
         List<RefreshToken> tokens = refreshTokenRepository.findAllByUserId(userId);
@@ -87,20 +82,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 refreshTokenRepository.save(token);
             }
         });
-
     }
 
-    @Transactional(readOnly = true)
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
-    }
 
+    @Override
     @Transactional
-    public void cleanExpiredTokens() {
-        Instant now = Instant.now();
-        refreshTokenRepository.deleteByExpiryDateBefore(now);
+    public int deleteAllExpiredTokens() {
+        return refreshTokenRepository.deleteByExpiryDateBefore(Instant.now());
     }
 
+    @Override
     @Transactional
     public void revokeToken(String token) {
         refreshTokenRepository.findByToken(token).ifPresent(refreshToken -> {

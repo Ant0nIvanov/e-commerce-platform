@@ -3,7 +3,6 @@ package ru.ivanov.authservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +34,10 @@ public class AuthServiceImpl implements AuthService {
     private final JWTUtils jwtUtils;
     private final UserDtoMapper userDtoMapper;
     private final PasswordEncoder passwordEncoder;
+
+    //todo реализовать инвалидацию access токена при logout
+    // например можно хранить id access токена в refresh токене
+    // и добавлять этот id в black list
 
     @Override
     @Transactional
@@ -77,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
         RefreshTokenStatus status = refreshTokenService.getTokenStatus(oldRefreshToken);
 
         if (status != RefreshTokenStatus.ACTIVE) {
-            throw new AuthException("Недействительный токен. Статус токен : " + status.name());
+            throw new AuthException("Недействительный токен. Статус токена: " + status.name());
         }
 
         UUID userId = jwtUtils.validateRefreshTokenAndExtractUserId(oldRefreshToken);
