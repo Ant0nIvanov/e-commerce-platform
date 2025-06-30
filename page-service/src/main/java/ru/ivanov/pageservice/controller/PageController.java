@@ -10,6 +10,6 @@ public class PageController {
 
     @GetMapping
     public String page() {
-        return "forward:v2.html";
+        return "forward:index.html";
     }
 }

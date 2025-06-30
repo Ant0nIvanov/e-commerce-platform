@@ -6,7 +6,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ivanov.cartservice.client.ProductClient;
@@ -132,8 +131,7 @@ public class CartServiceImpl implements CartService {
         }
 
         item.incrementQuantity();
-
-//        cartItemService.save(item);
+        cartItemService.save(item);
     }
 
     @Override
@@ -148,13 +146,13 @@ public class CartServiceImpl implements CartService {
         CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
 
         item.decreaseQuantity();
+        System.out.println(item.getQuantity());
 
         if (item.getQuantity() == 0) {
-
-//            cart.removeItem(item);
+            cartItemService.delete(item);
         }
 
-//        cartRepository.save(cart);
+        cartItemService.save(item);
     }
 
     @Override
@@ -164,12 +162,11 @@ public class CartServiceImpl implements CartService {
             throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
         }
 
-//        Cart cart = findCartByUserId(userId);
-//
-//        CartItem item = findItemInCartOrThrow(cart, productId);
-//
-//        cart.removeItem(item);
-//        cartRepository.save(cart);
+        Cart cart = cartEntityService.getCart(userId);
+
+        CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
+
+        cartItemService.delete(item);
     }
 
     @Override
@@ -180,69 +177,5 @@ public class CartServiceImpl implements CartService {
             throw new CartNotFoundException(CART_NOT_FOUND.formatted(userId));
         }
         cartRepository.deleteByUserId(userId);
-    }
-
-//    private Cart findCartByUserId(UUID userId) {
-//        return cartRepository.findCartByUserId(userId)
-//                .orElseThrow(() -> new CartNotFoundException(CART_NOT_FOUND_WITH_USER_ID.formatted(userId)));
-//    }
-//
-//    private CartItem findItemInCartOrCreateNew(Cart cart, UUID productId) {
-//        return cart.getItems().stream()
-//                .filter(item -> Objects.equals(item.getProductId(), productId))
-//                .findFirst()
-//                .orElseGet(() -> {
-//                    CartItem newItem = new CartItem(cart, productId);
-//                    cart.getItems().add(newItem);
-//                    return newItem;
-//                });
-//    }
-//
-//    private CartItem findItemInCartOrThrow(Cart cart, UUID productId) {
-//        List<CartItem> items = cart.getItems();
-//        return items.stream()
-//                .filter(item -> item.getProductId().equals(productId))
-//                .findFirst()
-//                .orElseThrow(() -> new ProductNotFoundInCartException(PRODUCT_NOT_FOUND_IN_CART
-//                        .formatted(productId, cart.getId())
-//                ));
-//    }
-
-
-
-
-
-    // Инвалидация кешей при изменении
-    private void evictCartCaches(UUID userId, UUID cartId) {
-        // 1. Инвалидируем DTO
-        Cache dtoCache = cacheManager.getCache("cartDtos");
-        if (dtoCache != null) {
-            dtoCache.evict(userId);
-        }
-
-        // 2. Инвалидируем сущность корзины
-        Cache cartCache = cacheManager.getCache("carts");
-        if (cartCache != null) {
-            cartCache.evict(userId);
-        }
-
-        // 3. Инвалидируем элементы корзины
-        Cache itemsCache = cacheManager.getCache("cartItems");
-        if (itemsCache != null) {
-            itemsCache.evict(cartId);
-        }
-    }
-
-    // Кеширование при создании
-    private void cacheCartAndDto(Cart cart) {
-        Cache cartCache = cacheManager.getCache("carts");
-        if (cartCache != null) {
-            cartCache.put(cart.getUserId(), cart);
-        }
-
-        Cache dtoCache = cacheManager.getCache("cartDtos");
-        if (dtoCache != null) {
-            dtoCache.put(cart.getUserId(), cartMapper.toDto(cart));
-        }
     }
 }

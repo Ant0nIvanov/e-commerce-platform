@@ -9,11 +9,12 @@ import ru.ivanov.authservice.dto.UserDto;
 import ru.ivanov.authservice.model.RefreshToken;
 
 import javax.crypto.SecretKey;
-import java.time.Duration;
-import java.time.Instant;
+import java.time.*;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JWTUtils {

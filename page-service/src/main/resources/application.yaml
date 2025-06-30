@@ -2,6 +2,9 @@ server:
   port: 8181
 
 spring:
+  application:
+    name: PAGE-SERVICE
+
   liquibase:
     enabled: false
   web:
@@ -14,6 +17,7 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
+
 product:
   service:
     url: ${PRODUCT_SERVICE_URL}
@@ -25,3 +29,7 @@ cart:
 auth:
   service:
     url: ${AUTH_SERVICE_URL}
+
+eureka:
+  client:
+    service-url: {http://localhost:8181/eureka}

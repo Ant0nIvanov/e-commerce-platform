@@ -1,12 +1,9 @@
 package ru.ivanov.cartservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ivanov.cartservice.exception.ProductNotFoundInCartException;
-import ru.ivanov.cartservice.model.Cart;
 import ru.ivanov.cartservice.model.CartItem;
 import ru.ivanov.cartservice.repository.CartItemRepository;
 
@@ -21,7 +18,11 @@ public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
 
-    @Cacheable(value = "cartItems", key = "{#cartId, #productId}")
+    @Transactional
+    public void save(CartItem item) {
+        cartItemRepository.save(item);
+    }
+
     @Transactional(readOnly = true)
     public CartItem getCartItem(UUID cartId, UUID productId) {
         return cartItemRepository.findByCartIdAndProductId(cartId, productId)
@@ -34,10 +35,19 @@ public class CartItemService {
     }
 
 
-    @Cacheable(value = "allCartItemsCart", key = "#cartId")
     @Transactional(readOnly = true)
     public List<CartItem> getAllItemsByCartId(UUID cartId) {
         return cartItemRepository.findAllByCartId(cartId);
     }
 
+
+    @Transactional
+    public void deleteByCartIdAndProductId(UUID cartId, UUID productId) {
+        cartItemRepository.deleteByCartIdAndProductId(cartId, productId);
+    }
+
+    @Transactional
+    public void delete(CartItem item) {
+        cartItemRepository.delete(item);
+    }
 }

@@ -6,6 +6,7 @@
     <title>Интернет-магазин - Каталог товаров</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Все ваши стили остаются без изменений */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -356,6 +357,17 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes centeredModalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
         .modal-header {
             padding: 22px;
             background: linear-gradient(135deg, #4285f4, #1a73e8);
@@ -497,7 +509,7 @@
             overflow-y: auto;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: modalFadeIn 0.4s;
+            animation: centeredModalFadeIn 0.3s ease-out;
         }
 
         .login-modal-header {
@@ -807,7 +819,7 @@
             overflow-y: auto;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: modalFadeIn 0.4s;
+            animation: centeredModalFadeIn 0.3s ease-out;
         }
 
         .register-modal-header {
@@ -1418,7 +1430,35 @@
     }
 
     // Выход из системы
-    function handleLogout() {
+    async function handleLogout() {
+        const authData = localStorage.getItem('authData');
+        let refreshToken = null;
+
+        if (authData) {
+            try {
+                const data = JSON.parse(authData);
+                refreshToken = data.refreshToken;
+            } catch (e) {
+                console.error('Ошибка парсинга authData:', e);
+            }
+        }
+
+        // Отправка запроса на сервер для выхода
+        if (refreshToken) {
+            try {
+                await fetch('http://localhost:8080/api/v1/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ refreshToken })
+                });
+            } catch (error) {
+                console.error('Ошибка при выходе из системы:', error);
+            }
+        }
+
+        // Всегда очищаем локальные данные
         localStorage.removeItem('authData');
         hideUserInfo();
         cartIcon.style.display = 'none';
