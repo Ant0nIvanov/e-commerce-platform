@@ -215,3 +215,18 @@ e-commerce-platform/
 ├── mvnw.cmd
 └── pom.xml
 </pre>
+
+## Скриншоты
+
+### Главная страница
+![Главная страница](screenshots/page.png)
+### Профиль пользователя
+![Карточка товара](screenshots/product.png)
+### Окно входа
+![Окно входа](screenshots/login.png)
+### Окно регистрации
+![Окно регистрации](screenshots/register.png)
+### После входа в систему
+![После входа](screenshots/afterLoginOrRegister.png)
+### Корзина
+![Корзина](screenshots/cart.png)
