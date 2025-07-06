@@ -1,6 +1,11 @@
 package ru.ivanov.cartservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ivanov.cartservice.client.ProductClient;
@@ -9,31 +14,35 @@ import ru.ivanov.cartservice.dto.ProductDto;
 import ru.ivanov.cartservice.dto.ProductInCartDto;
 import ru.ivanov.cartservice.exception.CartNotFoundException;
 import ru.ivanov.cartservice.exception.ProductNotFoundException;
-import ru.ivanov.cartservice.exception.ProductNotFoundInCartException;
 import ru.ivanov.cartservice.mapper.CartMapper;
 import ru.ivanov.cartservice.model.Cart;
 import ru.ivanov.cartservice.model.CartItem;
+import ru.ivanov.cartservice.repository.CartItemRepository;
 import ru.ivanov.cartservice.repository.CartRepository;
+import ru.ivanov.cartservice.service.CartEntityService;
+import ru.ivanov.cartservice.service.CartItemService;
 import ru.ivanov.cartservice.service.CartService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.ivanov.cartservice.util.MessageUtils.CART_NOT_FOUND_WITH_USER_ID;
-import static ru.ivanov.cartservice.util.MessageUtils.PRODUCT_NOT_FOUND_IN_CART;
+import static ru.ivanov.cartservice.util.MessageUtils.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
 
+    private final CartEntityService cartEntityService;
     public final CartRepository cartRepository;
+    public final CartItemRepository cartItemRepository;
+    public final CartItemService cartItemService;
     public final ProductClient productClient;
     public final CartMapper cartMapper;
+    public final CacheManager cacheManager;
 
     @Override
+    @CachePut(value = "cartDtos", key = "#userId")
     @Transactional
     public CartDto createCart(UUID userId) {
         Cart cart = new Cart(userId);
@@ -43,10 +52,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductInCartDto> getCart(UUID userId) {
-        Cart cart = findCartByUserId(userId);
+    public List<ProductInCartDto> getCartWithItems(UUID userId) {
+        Cart cart = cartEntityService.getCart(userId);
 
-        List<CartItem> cartItems = cart.getItems();
+        List<CartItem> cartItems = cartItemService.getAllItemsByCartId(cart.getId());
 
         Map<UUID, Integer> productQuantities = cartItems.stream()
                 .collect(Collectors.toMap(
@@ -56,100 +65,117 @@ public class CartServiceImpl implements CartService {
 
         List<UUID> productsIDs = productQuantities.keySet().stream().toList();
 
-        List<ProductDto> products = productClient.getProducts(productsIDs);
+        if (productsIDs.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        return products.stream()
-                .map(product -> new ProductInCartDto(
+        Cache cache = cacheManager.getCache("products");
+
+        if (cache == null) {
+           return productClient.getProducts(productsIDs).stream()
+                   .map(product -> new ProductInCartDto(
+                           product.id(),
+                           product.name(),
+                           product.price(),
+                           productQuantities.get(product.id())
+                   )).toList();
+        }
+
+        List<ProductInCartDto> productsInCart = new ArrayList<>();
+        List<UUID> missingIds = new ArrayList<>();
+
+        for (UUID id : productsIDs) {
+            ProductDto cachedProduct = cache.get(id, ProductDto.class);
+            if (cachedProduct != null) {
+                productsInCart.add(new ProductInCartDto(
+                        cachedProduct.id(),
+                        cachedProduct.name(),
+                        cachedProduct.price(),
+                        productQuantities.get(cachedProduct.id())
+                ));
+            } else {
+                missingIds.add(id);
+            }
+        }
+
+        if (!missingIds.isEmpty()) {
+            List<ProductDto> missingProducts = productClient.getProducts(missingIds);
+            for (ProductDto product : missingProducts) {
+                productsInCart.add(new ProductInCartDto(
                         product.id(),
                         product.name(),
                         product.price(),
                         productQuantities.get(product.id())
-                )).toList();
+                ));
+
+                cache.put(product.id(), product);
+            }
+        }
+
+        return productsInCart;
     }
 
     @Override
     @Transactional
     public void addProductToCart(UUID userId, UUID productId) {
         if (!productClient.isProductExists(productId)) {
-            throw new ProductNotFoundException("product not found");
+            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
         }
 
-        Cart cart = findCartByUserId(userId);
+        Cart cart = cartEntityService.getCart(userId);
 
-        CartItem item = findItemInCartOrCreateNew(cart, productId);
+        CartItem item = cartItemService.getCartItem(cart.getId(), productId);
+
+        if (item == null) {
+            item = new CartItem(cart.getId(), productId);
+        }
 
         item.incrementQuantity();
-
-        cartRepository.save(cart);
+        cartItemService.save(item);
     }
 
     @Override
     @Transactional
     public void decreaseProductQuantityInCart(UUID userId, UUID productId) {
         if (!productClient.isProductExists(productId)) {
-            throw new ProductNotFoundException("product not found");
+            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
         }
 
-        Cart cart = findCartByUserId(userId);
+        Cart cart = cartEntityService.getCart(userId);
 
-        CartItem item = findItemInCartOrThrow(cart, productId);
+        CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
 
         item.decreaseQuantity();
 
         if (item.getQuantity() == 0) {
-            cart.removeItem(item);
+            cartItemService.delete(item);
+            return;
         }
 
-        cartRepository.save(cart);
+        cartItemService.save(item);
     }
 
     @Override
     @Transactional
     public void removeProductFromCart(UUID userId, UUID productId) {
         if (!productClient.isProductExists(productId)) {
-            throw new ProductNotFoundException("product not found");
+            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
         }
 
-        Cart cart = findCartByUserId(userId);
+        Cart cart = cartEntityService.getCart(userId);
 
-        CartItem item = findItemInCartOrThrow(cart, productId);
+        CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
 
-        cart.removeItem(item);
-        cartRepository.save(cart);
+        cartItemService.delete(item);
     }
 
     @Override
+    @CacheEvict(value = "carts", key = "#userId")
     @Transactional
     public void deleteCart(UUID userId) {
         if (!cartRepository.existsByUserId(userId)) {
-            throw new CartNotFoundException(CART_NOT_FOUND_WITH_USER_ID.formatted(userId));
+            throw new CartNotFoundException(CART_NOT_FOUND.formatted(userId));
         }
         cartRepository.deleteByUserId(userId);
-    }
-
-    private Cart findCartByUserId(UUID userId) {
-        return cartRepository.findCartByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException(CART_NOT_FOUND_WITH_USER_ID.formatted(userId)));
-    }
-
-    private CartItem findItemInCartOrCreateNew(Cart cart, UUID productId) {
-        return cart.getItems().stream()
-                .filter(item -> Objects.equals(item.getProductId(), productId))
-                .findFirst()
-                .orElseGet(() -> {
-                    CartItem newItem = new CartItem(cart, productId);
-                    cart.getItems().add(newItem);
-                    return newItem;
-                });
-    }
-
-    private CartItem findItemInCartOrThrow(Cart cart, UUID productId) {
-        List<CartItem> items = cart.getItems();
-        return items.stream()
-                .filter(item -> item.getProductId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new ProductNotFoundInCartException(PRODUCT_NOT_FOUND_IN_CART
-                        .formatted(productId, cart.getId())
-                ));
     }
 }

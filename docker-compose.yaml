@@ -2,7 +2,7 @@ services:
 
   datasource:
     image: postgres:17-alpine
-    container_name: E-commerce_Platform_Datasource_Container
+    container_name: Datasource_Container
     environment:
       POSTGRES_DB: E-commerce_Platform_Datasource
       POSTGRES_USER: username
@@ -34,6 +34,8 @@ services:
     depends_on:
       datasource:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
       SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
@@ -55,6 +57,8 @@ services:
       start_period: 30s
     depends_on:
       datasource:
+        condition: service_healthy
+      eureka-server:
         condition: service_healthy
       user-service:
         condition: service_healthy
@@ -83,6 +87,8 @@ services:
     depends_on:
       datasource:
           condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
       SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
@@ -105,6 +111,8 @@ services:
     depends_on:
       datasource:
         condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     environment:
       USER_SERVICE_URL: http://user-service:8084/api/v1/users
       SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
@@ -125,6 +133,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+# todo убрать доступ в бд
     depends_on:
       datasource:
         condition: service_healthy
@@ -133,6 +142,37 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
       SPRING_DATASOURCE_USERNAME: username
       SPRING_DATASOURCE_PASSWORD: password
+
+  eureka-server:
+    container_name: Eureka-Server_Container
+    build:
+      context: eureka-server/.
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 10s
+
+  api-gateway:
+    container_name: Api-Gateway_Container
+    build:
+      context: api-gateway/.
+      dockerfile: Dockerfile
+    ports:
+      - "8765:8765"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8765/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      eureka-server:
+        condition: service_healthy
 
 volumes:
   e-commerce_platform_data:

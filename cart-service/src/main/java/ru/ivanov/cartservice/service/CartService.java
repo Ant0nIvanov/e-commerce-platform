@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface CartService {
     CartDto createCart(UUID userId);
 
-    List<ProductInCartDto> getCart(UUID userId);
+    List<ProductInCartDto> getCartWithItems(UUID userId);
 
     void addProductToCart(UUID userId, UUID productId);
 

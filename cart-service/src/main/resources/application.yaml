@@ -1,7 +1,16 @@
 server:
-  port: 8083
+  port: 0
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
 
 spring:
+  application:
+    name: cart-service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/E-commerce_Platform_Datasource
@@ -26,6 +35,6 @@ jwt:
   access:
     secret: 5ba1791dedb87fec844cd4c57bcf5c3afeb0379f4b67347a438bc559b429a52c
 
-product:
-  service:
-    url: http://localhost:8081/api/v1/products
+#product:
+#  service:
+#    url: http://localhost:8081/api/v1/products

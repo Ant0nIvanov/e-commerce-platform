@@ -1,6 +1,7 @@
 package ru.ivanov.userservice.exception.exceptionHandling;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -8,19 +9,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.ivanov.userservice.dto.response.ErrorResponse;
 import ru.ivanov.userservice.exception.RoleNotFoundException;
-import ru.ivanov.userservice.exception.UserAlreadyExistsException;
+import ru.ivanov.userservice.exception.UsernameIsTakenException;
 import ru.ivanov.userservice.exception.UserNotFoundException;
 
 import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandling {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ExceptionHandler(UsernameIsTakenException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(
-            UserAlreadyExistsException ex,
+            UsernameIsTakenException ex,
             HttpServletRequest request
     ) {
         ErrorResponse response = new ErrorResponse(
@@ -45,7 +47,7 @@ public class GlobalExceptionHandling {
                 HttpStatus.NOT_FOUND.value(),
                 LocalDateTime.now()
         );
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
@@ -55,6 +57,7 @@ public class GlobalExceptionHandling {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error(ex.getMessage(), ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 request.getRequestURI(),
                 ex.getMessage(),

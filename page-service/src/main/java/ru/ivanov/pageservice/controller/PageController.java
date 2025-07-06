@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("e-commerce")
-public class MainController {
+public class PageController {
 
     @GetMapping
     public String page() {
-        return "ecom_page";
+        return "forward:index.html";
     }
 }

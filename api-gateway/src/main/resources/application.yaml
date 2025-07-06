@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origin-patterns:
+                  -  "*"
+                allowed-methods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowed-headers: "*"
+#                allow-credentials: true
+                max-age: 3600
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: product-service-route
+              uri: lb://product-service
+              predicates:
+                - Path=/products/**
+              filters:
+                - PrefixPath=/api/v1
+            - id: cart-service-route
+              uri: lb://cart-service
+              predicates:
+                - Path=/carts/**
+              filters:
+                - PrefixPath=/api/v1
+            - id: auth-service-route
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth/**
+              filters:
+                - PrefixPath=/api/v1
+
+server:
+  port: 8765
+  forward-headers-strategy: framework
+
+eureka:
+  client:
+    service-url: {http://localhost:8761}

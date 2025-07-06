@@ -1,6 +1,7 @@
 package ru.ivanov.cartservice.exception.exceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.*;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -72,6 +74,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error(ex.toString());
         ErrorResponse errorResponse = new ErrorResponse(
                 request.getRequestURI(),
                 ex.getMessage(),

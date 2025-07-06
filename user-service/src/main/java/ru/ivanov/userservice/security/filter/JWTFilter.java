@@ -84,7 +84,12 @@ public class JWTFilter extends OncePerRequestFilter {
     @SuppressWarnings("unchecked")
     private Authentication createServiceAuthentication(Claims claims) {
         String issuer = claims.getIssuer();
-        UUID userId = claims.get("userId", UUID.class);
+        UUID userId = null;
+        Object userIdClaim = claims.get("userId");
+
+        if (userIdClaim != null) {
+            userId = UUID.fromString(userIdClaim.toString());
+        }
 
         List<String> roles = claims.get("roles", List.class);
         List<GrantedAuthority> authorities = roles.stream()

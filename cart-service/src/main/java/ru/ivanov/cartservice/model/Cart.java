@@ -21,18 +21,7 @@ public class Cart {
 
     private UUID userId;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> items = new ArrayList<>();
-
     public Cart(UUID userId) {
         this.userId = userId;
-    }
-
-    public void addItem(CartItem item) {
-        items.add(item);
-    }
-
-    public void removeItem(CartItem item) {
-        items.remove(item);
     }
 }

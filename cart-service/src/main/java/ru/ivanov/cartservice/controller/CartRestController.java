@@ -21,7 +21,7 @@ public class CartRestController {
     private final CartService cartService;
 
 //    @PostMapping("/new")
-//    // todo изучить кафку и создать подписку на событие UserRegisteredEvent
+//    // todo изучить кафку и создать подписку на событие
 //    public ResponseEntity<CartDto> createCartForNewUser(@RequestParam("userId") UUID userId) {
 //        CartDto cart = cartService.createCart(userId);
 //        return ResponseEntity.created(null)
@@ -32,11 +32,10 @@ public class CartRestController {
     @GetMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ProductInCartDto>> getCart(
-            // todo изменить List<productInCartDto> на CartDto с содержанием листа
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        List<ProductInCartDto> products = cartService.getCart(userId);
+        List<ProductInCartDto> products = cartService.getCartWithItems(userId);
         return ResponseEntity.ok(products);
     }
 
@@ -73,14 +72,8 @@ public class CartRestController {
         return ResponseEntity.ok().build();
     }
 
-//    @GetMapping("/admin")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public String admin() {
-//        return "admin";
-//    }
-
 //    @DeleteMapping
-    // todo изучить кафку и создать подписку на событие UserDeletedEvent
+    // todo изучить кафку и создать подписку на событие
 //    public ResponseEntity<Void> removeCart(
 //            @RequestHeader("Authorization") String token,
 //            @RequestParam("userId") UUID userId
