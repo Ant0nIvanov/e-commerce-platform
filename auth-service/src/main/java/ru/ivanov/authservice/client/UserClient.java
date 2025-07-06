@@ -2,10 +2,15 @@ package ru.ivanov.authservice.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
@@ -14,40 +19,29 @@ import ru.ivanov.authservice.dto.UserDto;
 import ru.ivanov.authservice.dto.request.LoginRequest;
 import ru.ivanov.authservice.dto.request.RegistrationRequest;
 import ru.ivanov.authservice.exception.UsernameIsTakenException;
+import ru.ivanov.authservice.feign.AuthInterface;
 import ru.ivanov.authservice.util.JWTUtils;
 
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceClient {
+public class UserClient {
 
-    private final RestTemplate restTemplate;
     private final JWTUtils jwtUtils;
-
-    @Value("${user.service.url}")
-    private String BASE_URL;
+    private final AuthInterface authInterface;
 
     @CachePut(value = "users", key = "#result.id")
     public UserDto createNewUser(RegistrationRequest request) {
         String serviceToken = jwtUtils.generateServiceToken(null);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(serviceToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        HttpEntity<RegistrationRequest> entity = new HttpEntity<>(request, headers);
-
         try {
-            ResponseEntity<UserDto> response = restTemplate.exchange(
-                    BASE_URL,
-                    HttpMethod.POST,
-                    entity,
-                    UserDto.class
-            );
+            String authHeader = "Bearer " + serviceToken;
+            ResponseEntity<UserDto> response = authInterface.createUser(authHeader, request);
+
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 return response.getBody();
@@ -70,20 +64,9 @@ public class UserServiceClient {
     public UserDto verifyCredentials(LoginRequest request) {
         String serviceToken = jwtUtils.generateServiceToken(null);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(serviceToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        HttpEntity<LoginRequest> entity = new HttpEntity<>(request, headers);
-
         try {
-            ResponseEntity<UserDto> response = restTemplate.exchange(
-                    BASE_URL + "/verify-credentials",
-                    HttpMethod.POST,
-                    entity,
-                    UserDto.class
-            );
+            String authHeader = "Bearer " + serviceToken;
+            ResponseEntity<UserDto> response = authInterface.verifyCredentials(authHeader, request);
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
@@ -99,18 +82,9 @@ public class UserServiceClient {
     public UserDto getUserById(UUID userId) {
         String serviceToken = jwtUtils.generateServiceToken(userId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(serviceToken);
-
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-
         try {
-            ResponseEntity<UserDto> response = restTemplate.exchange(
-                    BASE_URL,
-                    HttpMethod.GET,
-                    entity,
-                    UserDto.class
-            );
+            String authHeader = "Bearer " + serviceToken;
+            ResponseEntity<UserDto> response = authInterface.getUser(authHeader);
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();

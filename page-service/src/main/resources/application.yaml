@@ -1,9 +1,16 @@
 server:
   port: 8181
 
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
 spring:
   application:
-    name: PAGE-SERVICE
+    name: page-service
 
   liquibase:
     enabled: false
@@ -16,20 +23,3 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-
-
-product:
-  service:
-    url: ${PRODUCT_SERVICE_URL}
-
-cart:
-  service:
-    url: ${CART_SERVICE_URL}
-
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL}
-
-eureka:
-  client:
-    service-url: {http://localhost:8181/eureka}

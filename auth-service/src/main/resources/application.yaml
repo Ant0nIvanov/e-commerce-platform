@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  port: 0
+
 
 spring:
   datasource:
@@ -20,6 +21,8 @@ spring:
 
   liquibase:
     enabled: false
+  application:
+    name: auth-service
 
 jwt:
   issuer: auth-service
@@ -33,7 +36,9 @@ jwt:
     secret: 057f34884f6434c80285a39344a5a47dfd3a571a0ca3e8a65768e76ffc6bb660
     ttl: 1m
 
-
-user:
-  service:
-    url: http://localhost:8084/api/v1/users
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

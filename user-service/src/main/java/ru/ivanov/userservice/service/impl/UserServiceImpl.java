@@ -62,11 +62,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-//    @Cacheable(
-//            value = "userCredentials",
-//            key = "T(ru.ivanov.userservice.utils.CacheUtils).generateCredentialsKey(#username, #hashedPassword)",
-//            unless = "#result == null"
-//    )
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('AUTH_SERVICE')")
     public UserDto verifyCredentials(String username, String password) {
@@ -96,9 +91,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @CachePut(value = "users", key = "#result.id")
-//    @CacheEvict(
-//            value = "userCredentials",
-//            key = "T(ru.ivanov.userservice.utils.CacheUtils).generateCredentialsKey()")
     @Transactional
     public UserDto updateUser(UUID userId, UpdateUserRequest request) {
         User user = findUserById(userId);

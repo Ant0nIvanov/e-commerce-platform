@@ -4,12 +4,12 @@ server:
 spring:
   application:
     name: eureka-server
-eureka:
 
+eureka:
+  instance:
+    hostname: localhost
   client:
     register-with-eureka: false
     fetch-registry: false
-
-#   url куда будет происходить регистрация микросервисов и другие важные действия
-    service-url: {http://localhost:6666/eureka, anton}
-
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/

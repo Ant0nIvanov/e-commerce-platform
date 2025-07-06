@@ -146,10 +146,10 @@ public class CartServiceImpl implements CartService {
         CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
 
         item.decreaseQuantity();
-        System.out.println(item.getQuantity());
 
         if (item.getQuantity() == 0) {
             cartItemService.delete(item);
+            return;
         }
 
         cartItemService.save(item);

@@ -6,7 +6,6 @@
     <title>Интернет-магазин - Каталог товаров</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Все ваши стили остаются без изменений */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -1226,7 +1225,7 @@
             const refreshTokenValue = data.refreshToken;
             if (!refreshTokenValue) throw new Error('No refresh token');
 
-            const response = await fetch('http://localhost:8080/api/v1/auth/refresh', {
+            const response = await fetch('http://localhost:8765/auth/refresh', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ refreshToken: refreshTokenValue })
@@ -1390,7 +1389,7 @@
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+            const response = await fetch('http://localhost:8765/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1446,7 +1445,7 @@
         // Отправка запроса на сервер для выхода
         if (refreshToken) {
             try {
-                await fetch('http://localhost:8080/api/v1/auth/logout', {
+                await fetch('http://localhost:8765/auth/logout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1550,7 +1549,7 @@
         if (hasError) return;
 
         try {
-            const response = await fetch('http://localhost:8080/api/v1/auth/register', {
+            const response = await fetch('http://localhost:8765/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1623,7 +1622,7 @@
         }
 
         try {
-            const response = await authFetch('http://localhost:8083/api/v1/carts');
+            const response = await authFetch('http://localhost:8765/carts');
 
             if (!response.ok) {
                 if (!isAuthenticated()) return;
@@ -1711,7 +1710,7 @@
         }
 
         try {
-            const response = await authFetch(`http://localhost:8083/api/v1/carts/items/${productId}`, {
+            const response = await authFetch(`http://localhost:8765/carts/items/${productId}`, {
                 method: 'POST'
             });
 
@@ -1735,7 +1734,7 @@
 
         try {
             if (change === -1) {
-                const response = await authFetch(`http://localhost:8083/api/v1/carts/items/${productId}/decrement`, {
+                const response = await authFetch(`http://localhost:8765/carts/items/${productId}/decrement`, {
                     method: 'POST'
                 });
 
@@ -1744,7 +1743,7 @@
                 }
             }
             else if (change === 1) {
-                const response = await authFetch(`http://localhost:8083/api/v1/carts/items/${productId}`, {
+                const response = await authFetch(`http://localhost:8765/carts/items/${productId}`, {
                     method: 'POST'
                 });
 
@@ -1766,7 +1765,7 @@
         if (!token) return;
 
         try {
-            const response = await authFetch(`http://localhost:8083/api/v1/carts/items/${productId}`, {
+            const response = await authFetch(`http://localhost:8765/carts/items/${productId}`, {
                 method: 'DELETE'
             });
 
@@ -1786,7 +1785,7 @@
     // Загрузка категорий
     async function loadCategories() {
         try {
-            const response = await fetch('http://localhost:8081/api/v1/products/categories');
+            const response = await fetch('http://localhost:8765/products/categories');
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);
@@ -1847,7 +1846,7 @@
         }
 
         try {
-            const response = await fetch(`http://localhost:8081/api/v1/products?${params.toString()}`);
+            const response = await fetch(`http://localhost:8765/products?${params.toString()}`);
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);
@@ -1910,7 +1909,7 @@
         document.querySelector('.modal-content').dataset.productId = productId;
 
         try {
-            const response = await fetch(`http://localhost:8081/api/v1/products/${productId}`);
+            const response = await fetch(`http://localhost:8765/products/${productId}`);
 
             if (!response.ok) {
                 throw new Error(`Ошибка HTTP: ${response.status}`);

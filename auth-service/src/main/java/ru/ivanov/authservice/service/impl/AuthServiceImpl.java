@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ivanov.authservice.client.UserServiceClient;
+import ru.ivanov.authservice.client.UserClient;
 import ru.ivanov.authservice.dto.UserDto;
 import ru.ivanov.authservice.dto.UserSafeDto;
 import ru.ivanov.authservice.dto.request.LoginRequest;
@@ -30,7 +30,7 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final RefreshTokenService refreshTokenService;
-    private final UserServiceClient userClient;
+    private final UserClient userClient;
     private final JWTUtils jwtUtils;
     private final UserDtoMapper userDtoMapper;
     private final PasswordEncoder passwordEncoder;

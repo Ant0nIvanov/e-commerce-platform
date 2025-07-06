@@ -1,5 +1,6 @@
 package ru.ivanov.authservice.controller;
 
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +43,8 @@ public class AuthRestController {
                 .body(response);
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        System.out.println(Instant.now());
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok()
                 .contentType(APPLICATION_JSON)
