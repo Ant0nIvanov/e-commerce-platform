@@ -4,6 +4,6 @@ public record UpdateUserRequest(
         String username,
         String firstName,
         String lastName,
-        String hashedPassword
+        String password
 ) {
 }

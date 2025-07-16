@@ -13,6 +13,6 @@ public record RegistrationRequest(
         String lastName,
 
         @JsonProperty("password")
-        String hashedPassword
+        String password
 ) {
 }

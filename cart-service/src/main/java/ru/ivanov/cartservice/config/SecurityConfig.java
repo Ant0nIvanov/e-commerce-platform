@@ -35,9 +35,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/carts").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/carts/items/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/carts/**/decrement").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/carts/items/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/carts/items/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/carts/items/*/decrement").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/carts/items/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/carts/items").authenticated()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
                         .anyRequest().denyAll()
                 )

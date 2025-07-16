@@ -27,12 +27,11 @@ import static ru.ivanov.cartservice.util.MessageUtils.PRODUCT_SERVICE_IS_CURRENT
 @Service
 @RequiredArgsConstructor
 public class ProductClient {
-
+    private static final String PRODUCT_CACHE_NAME = "cart-service:products";
     private final CartInterface cartInterface;
 
     public List<ProductDto> getProducts(List<UUID> productsIDs) {
         ResponseEntity<List<ProductDto>> response = cartInterface.getProductsById(productsIDs);
-
         return response.getBody();
     }
 
@@ -47,17 +46,11 @@ public class ProductClient {
             return false;
         }
         throw new RuntimeException();
+    }
 
-
-
-//        try {
-//
-//
-//            throw new ProductServiceException("Invalid response from Product Service: "
-//                                              + response.getStatusCode() + ", body: " + response.getBody());
-//
-//        }  catch (RestClientException ex) {
-//            throw new ExternalServiceUnavailableException(PRODUCT_SERVICE_IS_CURRENTLY_UNAVAILABLE);
-//        }
+    @Cacheable(value = PRODUCT_CACHE_NAME, key = "#productId")
+    public ProductDto getProduct(UUID productId) {
+        ResponseEntity<ProductDto> response = cartInterface.getProductById(productId);
+        return response.getBody();
     }
 }

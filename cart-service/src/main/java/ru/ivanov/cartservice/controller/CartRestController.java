@@ -1,6 +1,7 @@
 package ru.ivanov.cartservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,65 +21,60 @@ public class CartRestController {
 
     private final CartService cartService;
 
-//    @PostMapping("/new")
-//    // todo изучить кафку и создать подписку на событие
-//    public ResponseEntity<CartDto> createCartForNewUser(@RequestParam("userId") UUID userId) {
-//        CartDto cart = cartService.createCart(userId);
-//        return ResponseEntity.created(null)
-//                .contentType(APPLICATION_JSON)
-//                .body(cart);
-//    }
-
     @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<ProductInCartDto>> getCart(
+    public ResponseEntity<List<ProductInCartDto>> getCartItems(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        List<ProductInCartDto> products = cartService.getCartWithItems(userId);
+        List<ProductInCartDto> products = cartService.getCartItems(userId);
         return ResponseEntity.ok(products);
     }
 
     @PostMapping("/items/{productId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> addProductToCart(
+    public ResponseEntity<ProductInCartDto> addProductToCart(
             @PathVariable("productId") UUID productId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        cartService.addProductToCart(userId, productId);
-        return ResponseEntity.ok().build();
+        ProductInCartDto productInCart = cartService.addItemToCart(userId, productId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(productInCart);
     }
 
-    @PostMapping("items/{productId}/decrement")
+    @PostMapping("/items/{productId}/decrement")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Void> decrementProductQuantityInCart(
+    public ResponseEntity<ProductInCartDto> decrementProductQuantityInCart(
             @PathVariable("productId") UUID productId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        cartService.decreaseProductQuantityInCart(userId, productId);
-        return ResponseEntity.ok().build();
+        ProductInCartDto productInCart = cartService.decreaseItemQuantityInCart(userId, productId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(productInCart);
     }
 
-    @DeleteMapping("items/{productId}")
+    @DeleteMapping("/items/{productId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> removeProductFromCart(
             @PathVariable("productId") UUID productId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        cartService.removeProductFromCart(userId, productId);
+        cartService.removeItemFromCart(userId, productId);
         return ResponseEntity.ok().build();
     }
 
-//    @DeleteMapping
-    // todo изучить кафку и создать подписку на событие
-//    public ResponseEntity<Void> removeCart(
-//            @RequestHeader("Authorization") String token,
-//            @RequestParam("userId") UUID userId
-//    ) {
-//        cartService.deleteCart(userId);
-//        return ResponseEntity.noContent().build();
-//    }
+    @DeleteMapping("/items")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> removeAllItemsFromCart(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UUID userId = userDetails.getUserId();
+        cartService.removeAllItemsFromCart(userId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -35,13 +35,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(GET, "/api/v1/products").permitAll()
                         .requestMatchers(GET, "/api/v1/products/**").permitAll()
-                        .requestMatchers(GET, "/api/v1/products/*/exists").permitAll() // запрос из другого сервиса
+                        .requestMatchers(GET, "/api/v1/products/**/exists").permitAll() // запрос из другого сервиса
                         .requestMatchers(GET, "/api/v1/products/by-ids").permitAll() // запрос из другого сервиса
                         .requestMatchers(POST, "/api/v1/products").hasRole("MANAGER")
                         .requestMatchers(PUT, "/api/v1/products/*").hasRole("MANAGER")
                         .requestMatchers(DELETE, "api/v1/products/*").hasRole("MANAGER")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().denyAll()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,14 +1,10 @@
 server:
   port: 8181
 
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
 spring:
+  config:
+    activate:
+      on-profile: default
   application:
     name: page-service
 
@@ -17,9 +13,3 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/
-
-  datasource:
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER}
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}

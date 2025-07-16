@@ -30,10 +30,24 @@ public class Product {
 
     private BigDecimal price;
 
+    private int quantity;
+
+    private UUID sellerId;
+
+    // todo временно оставляю этот конструктор
     public Product(String name, String description, ProductCategory category, BigDecimal price) {
         this.name = name;
         this.description = description;
         this.category = category;
         this.price = price;
+    }
+
+    public Product(String name, String description, ProductCategory category, BigDecimal price, int quantity, UUID sellerId) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.price = price;
+        this.quantity = quantity;
+        this.sellerId = sellerId;
     }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -36,5 +37,17 @@ public class CartItem {
 
     public void decreaseQuantity() {
         quantity--;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        CartItem cartItem = (CartItem) o;
+        return quantity == cartItem.quantity && Objects.equals(id, cartItem.id) && Objects.equals(cartId, cartItem.cartId) && Objects.equals(productId, cartItem.productId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, cartId, productId, quantity);
     }
 }

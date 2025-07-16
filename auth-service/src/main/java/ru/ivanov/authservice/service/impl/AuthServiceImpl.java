@@ -33,17 +33,10 @@ public class AuthServiceImpl implements AuthService {
     private final UserClient userClient;
     private final JWTUtils jwtUtils;
     private final UserDtoMapper userDtoMapper;
-    private final PasswordEncoder passwordEncoder;
-
-    //todo реализовать инвалидацию access токена при logout
-    // например можно хранить id access токена в refresh токене
-    // и добавлять этот id в black list
 
     @Override
     @Transactional
     public AuthResponse register(RegistrationRequest request) {
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
-
         UserDto createdUser =  userClient.createNewUser(request);
 
         String accessToken = jwtUtils.generateAccessToken(createdUser);
@@ -74,7 +67,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public JwtResponse refresh(RefreshTokenRequest request) {
-        log.info("refresh");
         String oldRefreshToken = request.refreshToken();
 
         RefreshTokenStatus status = refreshTokenService.getTokenStatus(oldRefreshToken);

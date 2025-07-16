@@ -1,4 +1,7 @@
 spring:
+  config:
+    activate:
+      on-profile: default
   application:
     name: api-gateway
 
@@ -17,8 +20,8 @@ spring:
                   - PUT
                   - DELETE
                   - OPTIONS
+                  - PATCH
                 allowed-headers: "*"
-#                allow-credentials: true
                 max-age: 3600
           discovery:
             locator:
@@ -44,10 +47,18 @@ spring:
               filters:
                 - PrefixPath=/api/v1
 
+            - id: user-service-route
+              uri: lb://user-service
+              predicates:
+                - Path=/users/**
+              filters:
+                - PrefixPath=/api/v1
+
 server:
   port: 8765
   forward-headers-strategy: framework
 
 eureka:
   client:
-    service-url: {http://localhost:8761}
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

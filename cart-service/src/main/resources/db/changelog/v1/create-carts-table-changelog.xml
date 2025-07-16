@@ -13,18 +13,12 @@
 
         <createTable tableName="carts">
             <column name="id" type="uuid">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="user_id" type="uuid">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
-
-        <addForeignKeyConstraint baseTableName="carts" baseColumnNames="user_id"
-                                 constraintName="user_id_fk"
-                                 referencedTableName="users"
-                                 referencedColumnNames="id"
-        />
 
         <rollback>
             <dropTable tableName="carts"/>

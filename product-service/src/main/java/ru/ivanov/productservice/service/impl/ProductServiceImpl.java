@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(put = {
-                @CachePut(value = "products", key = "#result.id"),
+                @CachePut(value = "product-service:products", key = "#result.id"),
                 @CachePut(value = "productExistence", key = "#result.id", condition = "#result != null")},
             evict = @CacheEvict(value = "productQueries", allEntries = true)
     )
@@ -60,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
             return Collections.emptyList();
         }
 
-        Cache cache = cacheManager.getCache("products");
+        Cache cache = cacheManager.getCache("product-service:products");
 
         if (cache == null) {
             return loadProductsBatch(productsIDs);
@@ -107,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(value = "products", key = "#productId")
+    @Cacheable(value = "product-service:products", key = "#productId")
     @Transactional(readOnly = true)
     public ProductDto getProductById(UUID productId) {
         Product product = findById(productId);
@@ -115,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @CachePut(value = "products", key = "#productId")
+    @CachePut(value = "product-service:products", key = "#productId")
     @CacheEvict(value = "productQueries", allEntries = true)
     @Transactional
     public ProductDto updateProduct(UUID productId, UpdateProductRequest request) {
@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @CacheEvict(value = {"products", "productExistence"}, key = "#productId")
+    @CacheEvict(value = {"product-service:products", "productExistence"}, key = "#productId")
     @Transactional
     public void deleteProduct(UUID productId) {
         if (!productRepository.existsById(productId)) {

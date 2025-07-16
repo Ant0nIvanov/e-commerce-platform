@@ -32,12 +32,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.disable())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").authenticated() // вызов из другого сервиса
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/verify-credentials").authenticated() // вызов из другого сервиса
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").authenticated()// вызов из другого сервиса
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users").authenticated()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
                         .anyRequest().denyAll()
                 )

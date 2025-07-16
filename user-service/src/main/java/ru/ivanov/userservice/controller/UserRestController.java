@@ -3,6 +3,7 @@ package ru.ivanov.userservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.sql.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,19 +53,21 @@ public class UserRestController {
                 .body(user);
     }
 
-    @PutMapping
-    public ResponseEntity<UserDto> updateUser(
-            UpdateUserRequest request,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
+    @PatchMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserDto> updateUserPatch(
+           @Valid @RequestBody UpdateUserRequest request,
+           @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         UUID userId = userDetails.getUserId();
-        UserDto updatedUser = userService.updateUser(userId, request);
+        UserDto updatedUser = userService.updateUserPatch(userId, request);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(updatedUser);
     }
 
     @DeleteMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteUser(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {

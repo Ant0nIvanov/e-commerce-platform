@@ -23,8 +23,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    //todo настроить кеширование, инвалидацию кеша
-
     @Override
     @Transactional
     public void save(RefreshToken refreshToken) {

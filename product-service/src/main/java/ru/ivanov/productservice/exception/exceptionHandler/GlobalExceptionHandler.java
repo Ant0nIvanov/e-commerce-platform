@@ -1,6 +1,7 @@
 package ru.ivanov.productservice.exception.exceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -84,6 +86,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error("error", ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 request.getRequestURI(),
                 ex.getMessage(),

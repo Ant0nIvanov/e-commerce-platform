@@ -1,12 +1,23 @@
 server:
-  port: 0
+  port: 8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
 
 spring:
+  config:
+    activate:
+      on-profile: default
+
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://localhost:5437/user-service-db
+    username: username
+    password: password
 
   jpa:
     open-in-view: false
@@ -23,6 +34,14 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.xml
   application:
     name: user-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+
 
 jwt:
   access:

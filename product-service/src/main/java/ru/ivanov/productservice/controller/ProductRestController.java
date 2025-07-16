@@ -46,7 +46,7 @@ public class ProductRestController {
     }
 
     @GetMapping("/{productId}/exists")
-//    @PreAuthorize("hasRole('CART-SERVICE')")
+    @PreAuthorize("hasRole('CART-SERVICE')")
     public ResponseEntity<Void> checkProductExists(@PathVariable UUID productId) {
         boolean exists = productService.productExists(productId);
         return exists
@@ -55,7 +55,7 @@ public class ProductRestController {
     }
 
     @GetMapping("/by-ids")
-//    @PreAuthorize("hasRole('CART-SERVICE')")
+    @PreAuthorize("hasRole('CART-SERVICE')")
     public ResponseEntity<List<ProductDto>> getProductsById(
            @RequestParam(name = "ids") List<UUID> productsIDs
     ) {

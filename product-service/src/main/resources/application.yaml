@@ -9,6 +9,10 @@ eureka:
     prefer-ip-address: true
 
 spring:
+  config:
+    activate:
+      on-profile: default
+
   application:
     name: product-service
   jpa:
@@ -21,10 +25,16 @@ spring:
       hibernate:
         format_sql: true
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5435/product-service-db
+    username: username
+    password: password
+
   data:
-    web:
-      pageable:
-        default-page-size: 10
+    redis:
+      host: localhost
+      port: 6380
 
   liquibase:
     enabled: true

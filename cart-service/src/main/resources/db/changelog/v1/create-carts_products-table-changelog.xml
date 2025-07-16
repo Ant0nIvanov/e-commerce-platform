@@ -33,12 +33,6 @@
                                  referencedColumnNames="id"
         />
 
-        <addForeignKeyConstraint baseTableName="carts_products" baseColumnNames="product_id"
-                                 constraintName="product_id_fk"
-                                 referencedTableName="products"
-                                 referencedColumnNames="id"
-        />
-
         <rollback>
             <dropTable tableName="carts_products"/>
         </rollback>

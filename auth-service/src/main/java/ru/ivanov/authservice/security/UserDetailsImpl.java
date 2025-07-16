@@ -1,6 +1,7 @@
 package ru.ivanov.authservice.security;
 
 import lombok.Getter;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

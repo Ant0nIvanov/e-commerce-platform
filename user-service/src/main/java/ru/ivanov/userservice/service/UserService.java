@@ -1,5 +1,6 @@
 package ru.ivanov.userservice.service;
 
+import jakarta.validation.Valid;
 import ru.ivanov.userservice.dto.UserDto;
 import ru.ivanov.userservice.dto.request.RegistrationRequest;
 import ru.ivanov.userservice.dto.request.UpdateUserRequest;
@@ -13,7 +14,7 @@ public interface UserService {
 
     UserDto getUser(UUID userId);
 
-    UserDto updateUser(UUID userId, UpdateUserRequest request);
+    UserDto updateUserPatch(UUID userId, UpdateUserRequest request);
 
     void deleteUserById(UUID userId);
 }

@@ -8,13 +8,13 @@ import ru.ivanov.userservice.model.User;
 @Component
 public class UserMapper {
 
-    public UserDto toDto(User user) {
+    public UserDto toDto(User User) {
         return new UserDto(
-          user.getId(),
-          user.getFirstName(),
-          user.getLastName(),
-          user.getUsername(),
-          user.getRoles().stream()
+          User.getId(),
+          User.getFirstName(),
+          User.getLastName(),
+          User.getUsername(),
+          User.getRoles().stream()
                   .map(Role::getName)
                   .toList()
         );

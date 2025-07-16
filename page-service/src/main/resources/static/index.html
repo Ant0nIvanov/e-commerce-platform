@@ -462,7 +462,7 @@
 
         .login-required {
             padding: 14px 28px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            background: linear-gradient(135deg, #f8f9fa, #e0e0e0);
             color: #666;
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -738,6 +738,7 @@
             padding: 0 25px 25px;
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .cart-button {
@@ -750,6 +751,7 @@
             transition: all 0.3s;
             border: none;
             text-align: center;
+            min-width: 200px;
         }
 
         .continue-shopping {
@@ -773,6 +775,19 @@
             background: linear-gradient(135deg, #00a885, #00b7b7);
             transform: translateY(-3px);
             box-shadow: 0 6px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        /* Стиль для новой кнопки очистки корзины */
+        .clear-cart {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .clear-cart:hover {
+            background: linear-gradient(135deg, #ff4757, #e84118);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
         }
 
         /* Добавляем новые стили для регистрации */
@@ -928,6 +943,264 @@
             font-weight: 500;
         }
 
+        /* Стили для профиля */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+
+        .profile-modal-content {
+            background-color: white;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: centeredModalFadeIn 0.3s ease-out;
+        }
+
+        .profile-modal-header {
+            padding: 22px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .profile-modal-title {
+            font-size: 1.6em;
+            font-weight: bold;
+        }
+
+        .profile-close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .profile-close-modal:hover {
+            transform: scale(1.1);
+        }
+
+        .profile-modal-body {
+            padding: 25px;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .profile-button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-align: center;
+        }
+
+        .profile-cancel {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            color: #555;
+        }
+
+        .profile-cancel:hover {
+            background: linear-gradient(135deg, #e0e0e0, #d5d5d5);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-save {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            box-shadow: 0 4px 10px rgba(155, 89, 182, 0.3);
+        }
+
+        .profile-save:hover {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        /* Стили для кнопки профиля в шапке */
+        .profile-button-header {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .profile-button-header:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Стили для аватара в профиле */
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ffa502);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.8em;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Добавляем стили для режима просмотра */
+        .view-mode .form-control {
+            background: none;
+            border: none;
+            padding: 0;
+            box-shadow: none;
+            pointer-events: none;
+            font-size: 1.05em;
+            color: #333;
+        }
+
+        .view-mode .form-group label {
+            font-weight: bold;
+            margin-bottom: 2px;
+            color: #777;
+        }
+
+        .view-mode .form-group {
+            margin-bottom: 15px;
+        }
+
+        .view-mode .form-control-value {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Стили для кнопки редактирования */
+        .profile-edit {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .profile-edit:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(41, 128, 185, 0.3);
+        }
+
+        /* Скрываем элементы в режиме просмотра */
+        .edit-only {
+            display: none;
+        }
+
+        /* Показываем элементы в режиме редактирования */
+        .edit-mode .view-only {
+            display: none;
+        }
+
+        .edit-mode .edit-only {
+            display: block;
+        }
+
+        /* Стили для подсказки имени пользователя */
+        .profile-username-hint {
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: #777;
+        }
+
+        .profile-username-error {
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+
+        .profile-username-success {
+            color: #00b894;
+            font-weight: 500;
+        }
+
+        /* Стили для кнопки удаления аккаунта */
+        .profile-delete {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .profile-delete:hover {
+            background: linear-gradient(135deg, #ff4757, #e84118);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .delete-confirmation {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff8f8;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #ffcccc;
+            display: none;
+        }
+
+        .delete-confirmation p {
+            margin-bottom: 15px;
+            color: #d9534f;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .confirm-delete {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+        }
+
+        .cancel-delete {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            color: #555;
+        }
+
         @media (max-width: 900px) {
             .modal-body, .cart-modal-content {
                 grid-template-columns: 1fr;
@@ -962,12 +1235,26 @@
             .cart-actions {
                 flex-direction: column;
             }
+
+            .profile-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .profile-button {
+                width: 100%;
+            }
+
+            .cart-button {
+                min-width: 100%;
+            }
         }
 
         /* Адаптация для маленьких экранов */
         @media (max-height: 700px) {
             .register-modal-body,
-            .login-modal-body {
+            .login-modal-body,
+            .profile-modal-body {
                 padding: 20px;
             }
 
@@ -981,7 +1268,8 @@
             }
 
             .register-modal-header,
-            .login-modal-header {
+            .login-modal-header,
+            .profile-modal-header {
                 padding: 15px;
             }
         }
@@ -1002,6 +1290,7 @@
                     <span id="username">Пользователь</span>
                     <span id="adminBadge" class="admin-badge" style="display: none;">ADMIN</span>
                 </div>
+                <button class="profile-button-header" id="profileButton">Профиль</button>
                 <button class="logout-button" id="logoutButton">Выйти</button>
             </div>
             <button id="loginButton" class="login-button">Войти</button>
@@ -1143,9 +1432,94 @@
             <button class="cart-button continue-shopping" id="continueShopping">
                 <i class="fas fa-arrow-left"></i> Продолжить покупки
             </button>
+            <!-- Новая кнопка для очистки корзины -->
+            <button class="cart-button clear-cart" id="clearCartButton" style="display: none;">
+                <i class="fas fa-trash-alt"></i> Очистить корзину
+            </button>
             <button class="cart-button checkout" id="checkoutButton">
                 Оформить заказ <i class="fas fa-check"></i>
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно профиля -->
+<div id="profileModal" class="profile-modal">
+    <div class="profile-modal-content">
+        <div class="profile-modal-header">
+            <h2 class="profile-modal-title"><i class="fas fa-user-circle"></i> Ваш профиль</h2>
+            <button class="profile-close-modal">&times;</button>
+        </div>
+        <div class="profile-modal-body">
+            <div class="profile-avatar" id="profileAvatar">U</div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Логин:</label>
+                    <div class="form-control-value view-only" id="profileUsernameView">-</div>
+                    <input type="text" class="edit-only" id="profileUsername" name="username" required>
+                    <div id="profileUsernameHint" class="profile-username-hint"></div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> Имя:</label>
+                    <div class="form-control-value view-only" id="profileFirstNameView">-</div>
+                    <input type="text" class="edit-only" id="profileFirstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> Фамилия:</label>
+                    <div class="form-control-value view-only" id="profileLastNameView">-</div>
+                    <input type="text" class="edit-only" id="profileLastName" name="lastName" required>
+                </div>
+
+                <!-- Поля для пароля (только в режиме редактирования) -->
+                <div id="passwordFields" class="edit-only">
+                    <div class="form-group">
+                        <label for="profilePassword"><i class="fas fa-lock"></i> Новый пароль:</label>
+                        <input type="password" id="profilePassword" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileConfirmPassword"><i class="fas fa-lock"></i> Подтвердите пароль:</label>
+                        <input type="password" id="profileConfirmPassword">
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <!-- Кнопки для режима просмотра -->
+                    <div id="viewModeButtons" class="view-only" style="width: 100%;">
+                        <button type="button" class="profile-button profile-edit" id="editProfileBtn">
+                            Редактировать профиль
+                        </button>
+
+                        <!-- Кнопка удаления аккаунта -->
+                        <button type="button" class="profile-button profile-delete" id="deleteAccountBtn">
+                            <i class="fas fa-trash-alt"></i> Удалить аккаунт
+                        </button>
+                    </div>
+
+                    <!-- Кнопки для режима редактирования -->
+                    <div id="editModeButtons" class="edit-only" style="display: none; width: 100%;">
+                        <button type="button" class="profile-button profile-cancel" id="cancelEditBtn">
+                            Отмена
+                        </button>
+                        <button type="submit" class="profile-button profile-save">
+                            Сохранить
+                        </button>
+                    </div>
+                </div>
+                <div id="profileError" class="register-error" style="margin-top: 15px;"></div>
+            </form>
+
+            <!-- Контейнер для подтверждения удаления -->
+            <div id="deleteConfirmation" class="delete-confirmation" style="display: none;">
+                <p><i class="fas fa-exclamation-triangle"></i> Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо!</p>
+                <div class="confirmation-buttons">
+                    <button class="profile-button confirm-delete" id="confirmDeleteBtn">
+                        Да, удалить аккаунт
+                    </button>
+                    <button class="profile-button cancel-delete" id="cancelDeleteBtn">
+                        Отмена
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1163,6 +1537,8 @@
     let categoryMapping = {};
     let isRefreshing = false;
     let failedQueue = [];
+    let originalProfileData = null;
+    let cartItemsData = []; // Хранит состояние корзины локально
 
     // ====================== DOM ЭЛЕМЕНТЫ ======================
     const productsContainer = document.getElementById('products-container');
@@ -1200,6 +1576,32 @@
     const closeModalBtn = document.querySelectorAll('.close-modal');
     const loginCloseModal = document.querySelector('.login-close-modal');
     const registerCloseModal = document.querySelector('.register-close-modal');
+    const clearCartButton = document.getElementById('clearCartButton');
+
+    // Элементы профиля
+    const profileButton = document.getElementById('profileButton');
+    const profileModal = document.getElementById('profileModal');
+    const profileForm = document.getElementById('profileForm');
+    const profileUsername = document.getElementById('profileUsername');
+    const profileUsernameView = document.getElementById('profileUsernameView');
+    const profileFirstName = document.getElementById('profileFirstName');
+    const profileFirstNameView = document.getElementById('profileFirstNameView');
+    const profileLastName = document.getElementById('profileLastName');
+    const profileLastNameView = document.getElementById('profileLastNameView');
+    const profilePassword = document.getElementById('profilePassword');
+    const profileConfirmPassword = document.getElementById('profileConfirmPassword');
+    const profileError = document.getElementById('profileError');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const profileCloseModal = document.querySelector('.profile-close-modal');
+    const profileUsernameHint = document.getElementById('profileUsernameHint');
+
+    // Элементы для удаления аккаунта
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    const deleteConfirmation = document.getElementById('deleteConfirmation');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 
     // ====================== УТИЛИТЫ ДЛЯ РАБОТЫ С ТОКЕНАМИ ======================
 
@@ -1400,6 +1802,7 @@
             if (response.ok) {
                 const authResponse = await response.json();
 
+                // Сохраняем весь объект авторизации
                 localStorage.setItem('authData', JSON.stringify(authResponse));
                 showUserInfo(authResponse.user);
                 closeLoginModal();
@@ -1461,6 +1864,10 @@
         localStorage.removeItem('authData');
         hideUserInfo();
         cartIcon.style.display = 'none';
+
+        // Очищаем локальное состояние корзины
+        cartItemsData = [];
+        renderCart();
 
         if (productModal.style.display === 'block') {
             const productId = document.querySelector('.modal-content').dataset.productId;
@@ -1565,6 +1972,7 @@
             if (response.ok) {
                 const authResponse = await response.json();
 
+                // Сохраняем весь объект авторизации
                 localStorage.setItem('authData', JSON.stringify(authResponse));
                 showUserInfo(authResponse.user);
                 closeRegisterModal();
@@ -1609,15 +2017,47 @@
         }, 5000);
     }
 
-    // ====================== КОРЗИНА ======================
+    // ====================== КОРЗИНА (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ) ======================
 
-    // Загрузка корзины пользователя (с использованием authFetch)
+    // Обновление корзины на основе ответа сервера
+    function updateCartFromResponse(item) {
+        // Находим индекс товара в текущей корзине
+        const index = cartItemsData.findIndex(i => i.productId === item.productId);
+
+        if (index !== -1) {
+            // Если количество стало 0 - удаляем товар
+            if (item.quantity <= 0) {
+                cartItemsData.splice(index, 1);
+            } else {
+                // Обновляем существующий товар
+                cartItemsData[index] = item;
+            }
+        } else if (item.quantity > 0) {
+            // Добавляем новый товар
+            cartItemsData.push(item);
+        }
+
+        // Пересчитываем общее количество товаров
+        updateCartCount();
+        // Перерисовываем корзину
+        renderCart();
+    }
+
+    // Обновляем счетчик товаров в корзине
+    function updateCartCount() {
+        const count = cartItemsData.reduce((total, item) => total + item.quantity, 0);
+        cartCount.textContent = count;
+    }
+
+    // Загрузка корзины пользователя
     async function loadCart() {
         const token = getAuthToken();
         if (!token) {
             cartItems.innerHTML = '<div class="cart-empty"><i class="fas fa-exclamation-circle"></i> Для просмотра корзины необходимо авторизоваться</div>';
             cartTotal.textContent = '0';
             cartCount.textContent = '0';
+            clearCartButton.style.display = 'none';
+            cartItemsData = []; // Сбрасываем данные
             return;
         }
 
@@ -1629,8 +2069,8 @@
                 throw new Error(`Ошибка HTTP: ${response.status}`);
             }
 
-            const cartItemsData = await response.json();
-            renderCart(cartItemsData);
+            cartItemsData = await response.json();
+            renderCart();
         } catch (error) {
             if (!isAuthenticated()) return;
             cartItems.innerHTML = '<div class="cart-empty"><i class="fas fa-exclamation-triangle"></i> Ошибка загрузки корзины</div>';
@@ -1639,23 +2079,21 @@
     }
 
     // Отображение корзины
-    function renderCart(cartItemsData) {
+    function renderCart() {
         if (!cartItemsData || cartItemsData.length === 0) {
             cartItems.innerHTML = '<div class="cart-empty"><i class="fas fa-shopping-cart fa-3x" style="margin-bottom: 20px; color: #ddd;"></i><p>Ваша корзина пуста</p></div>';
             cartTotal.textContent = '0';
             cartCount.textContent = '0';
+            clearCartButton.style.display = 'none';
             return;
         }
 
         let total = 0;
-        let itemsCount = 0;
-
         cartItems.innerHTML = '';
 
         cartItemsData.forEach(item => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            itemsCount += item.quantity;
 
             const cartItemElement = document.createElement('div');
             cartItemElement.className = 'cart-item';
@@ -1677,8 +2115,10 @@
         });
 
         cartTotal.textContent = total.toFixed(2);
-        cartCount.textContent = itemsCount;
+        updateCartCount();
+        clearCartButton.style.display = 'block';
 
+        // Добавляем обработчики событий
         document.querySelectorAll('.quantity-decrease').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1701,7 +2141,7 @@
         });
     }
 
-    // Добавление товара в корзину (с использованием authFetch)
+    // Добавление товара в корзину
     async function addToCart(productId) {
         const token = getAuthToken();
         if (!token) {
@@ -1718,7 +2158,9 @@
                 throw new Error(`Ошибка HTTP: ${response.status}`);
             }
 
-            loadCart();
+            const item = await response.json();
+            updateCartFromResponse(item);
+
             return true;
         } catch (error) {
             console.error('Ошибка добавления в корзину:', error);
@@ -1727,39 +2169,46 @@
         }
     }
 
-    // Обновление количества товара в корзине (с использованием authFetch)
+    // Обновление количества товара в корзине
     async function updateCartItemQuantity(productId, change) {
         const token = getAuthToken();
         if (!token) return;
 
         try {
+            let response;
             if (change === -1) {
-                const response = await authFetch(`http://localhost:8765/carts/items/${productId}/decrement`, {
+                response = await authFetch(`http://localhost:8765/carts/items/${productId}/decrement`, {
                     method: 'POST'
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
-            }
-            else if (change === 1) {
-                const response = await authFetch(`http://localhost:8765/carts/items/${productId}`, {
+            } else if (change === 1) {
+                response = await authFetch(`http://localhost:8765/carts/items/${productId}`, {
                     method: 'POST'
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
             }
 
-            loadCart();
+            if (!response.ok) {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+
+            // Обрабатываем разные статусы ответа
+            if (response.status === 204) {
+                // Товар удален (количество стало 0)
+                updateCartFromResponse({
+                    productId: productId,
+                    quantity: 0
+                });
+            } else {
+                // Товар обновлен
+                const item = await response.json();
+                updateCartFromResponse(item);
+            }
         } catch (error) {
             console.error('Ошибка обновления корзины:', error);
             alert('Не удалось обновить корзину');
         }
     }
 
-    // Удаление товара из корзины (с использованием authFetch)
+    // Удаление товара из корзины
     async function removeFromCart(productId) {
         const token = getAuthToken();
         if (!token) return;
@@ -1773,10 +2222,40 @@
                 throw new Error(`Ошибка HTTP: ${response.status}`);
             }
 
-            loadCart();
+            // Удаляем товар из массива
+            cartItemsData = cartItemsData.filter(i => i.productId !== productId);
+            renderCart();
         } catch (error) {
             console.error('Ошибка удаления из корзины:', error);
             alert('Не удалось удалить товар из корзины');
+        }
+    }
+
+    // Очистка всей корзины
+    async function clearCart() {
+        const token = getAuthToken();
+        if (!token) return;
+
+        if (!confirm('Вы уверены, что хотите полностью очистить корзину? Это действие нельзя отменить.')) {
+            return;
+        }
+
+        try {
+            const response = await authFetch('http://localhost:8765/carts/items', {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+
+            // Полностью очищаем корзину
+            cartItemsData = [];
+            renderCart();
+            alert('Корзина успешно очищена!');
+        } catch (error) {
+            console.error('Ошибка очистки корзины:', error);
+            alert('Не удалось очистить корзину');
         }
     }
 
@@ -2047,6 +2526,292 @@
         loadProducts(0);
     }
 
+    // ====================== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ======================
+
+    // Открытие модального окна профиля
+    function openProfileModal() {
+        profileModal.style.display = 'block';
+        loadProfileData();
+        switchToViewMode();
+    }
+
+    // Закрытие модального окна профиля
+    function closeProfileModal() {
+        profileModal.style.display = 'none';
+        profileForm.reset();
+        profileError.style.display = 'none';
+        profileUsernameHint.textContent = '';
+        profileUsernameHint.className = 'profile-username-hint';
+        deleteConfirmation.style.display = 'none';
+    }
+
+    // Переключение в режим просмотра
+    function switchToViewMode() {
+        // Скрываем поля редактирования
+        document.querySelectorAll('.edit-only').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // Показываем поля просмотра
+        document.querySelectorAll('.view-only').forEach(el => {
+            el.style.display = 'block';
+        });
+
+        // Показываем кнопку редактирования
+        document.getElementById('viewModeButtons').style.display = 'block';
+
+        // Скрываем кнопки сохранения/отмены
+        document.getElementById('editModeButtons').style.display = 'none';
+
+        // Скрываем подтверждение удаления
+        deleteConfirmation.style.display = 'none';
+
+        // Сбрасываем ошибки
+        profileError.style.display = 'none';
+        profileUsernameHint.textContent = '';
+        profileUsernameHint.className = 'profile-username-hint';
+    }
+
+    // Переключение в режим редактирования
+    function switchToEditMode() {
+        // Скрываем поля просмотра
+        document.querySelectorAll('.view-only').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // Показываем поля редактирования
+        document.querySelectorAll('.edit-only').forEach(el => {
+            el.style.display = 'block';
+        });
+
+        // Скрываем кнопку редактирования
+        document.getElementById('viewModeButtons').style.display = 'none';
+
+        // Показываем кнопки сохранения/отмены
+        document.getElementById('editModeButtons').style.display = 'flex';
+
+        // Скрываем подтверждение удаления
+        deleteConfirmation.style.display = 'none';
+
+        // Сбрасываем ошибки
+        profileError.style.display = 'none';
+        profilePassword.value = '';
+        profileConfirmPassword.value = '';
+    }
+
+    // Загрузка данных профиля
+    function loadProfileData() {
+        const authData = localStorage.getItem('authData');
+        if (!authData) {
+            showProfileError('Данные пользователя не найдены');
+            return;
+        }
+
+        try {
+            const data = JSON.parse(authData);
+            const userData = data.user;
+
+            // Заполняем данные для просмотра
+            profileUsernameView.textContent = userData.username || '-';
+            profileFirstNameView.textContent = userData.firstName || '-';
+            profileLastNameView.textContent = userData.lastName || '-';
+
+            // Заполняем поля для редактирования
+            profileUsername.value = userData.username || '';
+            profileFirstName.value = userData.firstName || '';
+            profileLastName.value = userData.lastName || '';
+
+            // Устанавливаем аватар
+            let initials = '';
+            if (userData.firstName && userData.lastName) {
+                initials = `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
+            } else if (userData.username) {
+                initials = userData.username.substring(0, 2).toUpperCase();
+            }
+            profileAvatar.textContent = initials;
+
+            // Сохраняем исходные данные
+            originalProfileData = {
+                username: userData.username || '',
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || ''
+            };
+
+        } catch (error) {
+            console.error('Ошибка загрузки профиля:', error);
+            showProfileError('Не удалось загрузить данные профиля');
+        }
+    }
+
+    // Обновление профиля - ОТПРАВКА ТОЛЬКО ИЗМЕНЕННЫХ ПОЛЕЙ
+    async function updateProfile(event) {
+        event.preventDefault();
+
+        const username = profileUsername.value.trim();
+        const firstName = profileFirstName.value.trim();
+        const lastName = profileLastName.value.trim();
+        const password = profilePassword.value;
+        const confirmPassword = profileConfirmPassword.value;
+
+        profileError.style.display = 'none';
+        let hasError = false;
+
+        // Сбрасываем подсветку ошибок
+        document.querySelectorAll('.error-field').forEach(el => {
+            el.classList.remove('error-field');
+        });
+
+        // Валидация пароля только если он введен
+        if (password || confirmPassword) {
+            if (password !== confirmPassword) {
+                showProfileError('Пароли не совпадают');
+                highlightProfileError('profilePassword');
+                highlightProfileError('profileConfirmPassword');
+                hasError = true;
+            }
+
+            if (password.length > 0 && password.length < 6) {
+                showProfileError('Пароль должен содержать минимум 6 символов');
+                highlightProfileError('profilePassword');
+                hasError = true;
+            }
+        }
+
+        if (hasError) return;
+
+        try {
+            // Формируем данные для обновления ТОЛЬКО ИЗМЕНЕННЫХ ПОЛЕЙ
+            const updateData = {};
+
+            // Сравниваем каждое поле с оригиналом
+            if (username !== originalProfileData.username) {
+                updateData.username = username;
+            }
+            if (firstName !== originalProfileData.firstName) {
+                updateData.firstName = firstName;
+            }
+            if (lastName !== originalProfileData.lastName) {
+                updateData.lastName = lastName;
+            }
+
+            // Добавляем пароль, если он указан
+            if (password) {
+                updateData.password = password;
+            }
+
+            // Если нет изменений - просто возвращаемся в режим просмотра
+            if (Object.keys(updateData).length === 0) {
+                switchToViewMode();
+                return; // Ничего не делаем, просто выходим
+            }
+
+            // Отправляем запрос на обновление
+            const response = await authFetch('http://localhost:8765/users', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData) // Отправляем только изменения
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+
+            // Обновляем локальные данные
+            const authData = JSON.parse(localStorage.getItem('authData'));
+            if (authData && authData.user) {
+                // Обновляем только измененные поля
+                if (updateData.username) authData.user.username = updateData.username;
+                if (updateData.firstName) authData.user.firstName = updateData.firstName;
+                if (updateData.lastName) authData.user.lastName = updateData.lastName;
+
+                localStorage.setItem('authData', JSON.stringify(authData));
+                showUserInfo(authData.user);
+
+                // Обновляем исходные данные
+                originalProfileData = {
+                    ...originalProfileData,
+                    ...updateData
+                };
+            }
+
+            // Обновляем данные в режиме просмотра
+            profileUsernameView.textContent = username || '-';
+            profileFirstNameView.textContent = firstName || '-';
+            profileLastNameView.textContent = lastName || '-';
+
+            // Возвращаемся в режим просмотра
+            switchToViewMode();
+
+            alert('Профиль успешно обновлен!');
+
+        } catch (error) {
+            console.error('Ошибка обновления профиля:', error);
+            showProfileError('Не удалось обновить профиль. Попробуйте снова.');
+        }
+    }
+
+    // Проверка доступности логина
+    async function checkUsernameAvailability(username) {
+        try {
+            const response = await fetch(`http://localhost:8765/auth/check-username?username=${encodeURIComponent(username)}`);
+            const data = await response.json();
+            return data.available;
+        } catch (error) {
+            console.error('Ошибка проверки логина:', error);
+            return false;
+        }
+    }
+
+    // Подсветка поля с ошибкой в профиле
+    function highlightProfileError(fieldId, message = '') {
+        const field = document.getElementById(fieldId);
+        field.classList.add('error-field');
+        field.focus();
+
+        if (message) {
+            profileError.textContent = message;
+            profileError.style.display = 'block';
+        }
+    }
+
+    // Показать ошибку профиля
+    function showProfileError(message) {
+        profileError.textContent = message;
+        profileError.style.display = 'block';
+        profileError.style.animation = 'shake 0.5s ease-in-out';
+
+        setTimeout(() => {
+            profileError.style.display = 'none';
+        }, 5000);
+    }
+
+    // ====================== УДАЛЕНИЕ АККАУНТА ======================
+
+    // Удаление аккаунта
+    async function deleteAccount() {
+        try {
+            const response = await authFetch('http://localhost:8765/users', {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                localStorage.removeItem('authData');
+                hideUserInfo();
+                closeProfileModal();
+                alert('Ваш аккаунт был успешно удален. Спасибо, что были с нами!');
+                // Обновляем страницу для сброса состояния
+                location.reload();
+            } else {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Ошибка удаления аккаунта:', error);
+            showProfileError('Не удалось удалить аккаунт. Пожалуйста, попробуйте позже.');
+        }
+    }
+
     // ====================== ИНИЦИАЛИЗАЦИЯ ======================
 
     // Инициализация обработчиков событий
@@ -2070,6 +2835,9 @@
             }
             if (e.target === registerModal) {
                 closeRegisterModal();
+            }
+            if (e.target === profileModal) {
+                closeProfileModal();
             }
         });
 
@@ -2106,6 +2874,9 @@
             loadCart();
         });
 
+        // Обработчик для новой кнопки очистки корзины
+        clearCartButton.addEventListener('click', clearCart);
+
         registerLink.addEventListener('click', () => {
             closeLoginModal();
             openRegisterModal();
@@ -2118,6 +2889,88 @@
             this.classList.remove('error-field');
             usernameHint.textContent = 'Должен быть уникальным';
             usernameHint.className = 'username-hint';
+        });
+
+        // Обработчики для профиля
+        profileButton.addEventListener('click', openProfileModal);
+        profileForm.addEventListener('submit', updateProfile);
+        profileCloseModal.addEventListener('click', closeProfileModal);
+        editProfileBtn.addEventListener('click', switchToEditMode);
+        cancelEditBtn.addEventListener('click', () => {
+            // Восстанавливаем значения из originalProfileData
+            profileUsername.value = originalProfileData.username;
+            profileFirstName.value = originalProfileData.firstName;
+            profileLastName.value = originalProfileData.lastName;
+
+            switchToViewMode();
+        });
+
+        // Проверка доступности логина при редактировании
+        profileUsername.addEventListener('input', async function() {
+            const newUsername = this.value.trim();
+            const currentUsername = profileUsernameView.textContent;
+
+            // Сбрасываем стили ошибок
+            this.classList.remove('error-field');
+            profileError.style.display = 'none';
+
+            // Если логин не изменился, ничего не делаем
+            if (newUsername === currentUsername) {
+                profileUsernameHint.textContent = '';
+                return;
+            }
+
+            // Проверяем минимальную длину
+            if (newUsername.length < 3) {
+                profileUsernameHint.textContent = 'Логин должен содержать минимум 3 символа';
+                profileUsernameHint.className = 'profile-username-hint profile-username-error';
+                return;
+            }
+
+            // Проверяем доступность логина
+            const isAvailable = await checkUsernameAvailability(newUsername);
+
+            if (isAvailable) {
+                profileUsernameHint.textContent = 'Логин доступен';
+                profileUsernameHint.className = 'profile-username-hint profile-username-success';
+            } else {
+                profileUsernameHint.textContent = 'Этот логин уже занят';
+                profileUsernameHint.className = 'profile-username-hint profile-username-error';
+            }
+        });
+
+        // Сброс ошибок при изменении полей профиля
+        profileFirstName.addEventListener('input', () => {
+            profileFirstName.classList.remove('error-field');
+            profileError.style.display = 'none';
+        });
+
+        profileLastName.addEventListener('input', () => {
+            profileLastName.classList.remove('error-field');
+            profileError.style.display = 'none';
+        });
+
+        profilePassword.addEventListener('input', () => {
+            profilePassword.classList.remove('error-field');
+            profileConfirmPassword.classList.remove('error-field');
+            profileError.style.display = 'none';
+        });
+
+        profileConfirmPassword.addEventListener('input', () => {
+            profilePassword.classList.remove('error-field');
+            profileConfirmPassword.classList.remove('error-field');
+            profileError.style.display = 'none';
+        });
+
+        // Обработчики для удаления аккаунта
+        deleteAccountBtn.addEventListener('click', () => {
+            deleteConfirmation.style.display = 'block';
+        });
+
+        confirmDeleteBtn.addEventListener('click', deleteAccount);
+
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteConfirmation.style.display = 'none';
         });
     }
 

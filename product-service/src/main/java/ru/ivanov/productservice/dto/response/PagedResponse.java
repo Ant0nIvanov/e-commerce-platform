@@ -2,6 +2,7 @@ package ru.ivanov.productservice.dto.response;
 
 import org.springframework.data.domain.Page;
 
+import java.io.Serializable;
 import java.util.List;
 
 public record PagedResponse<T>(
@@ -12,7 +13,7 @@ public record PagedResponse<T>(
         boolean first,
         boolean last,
         List<T> content
-) {
+) implements Serializable {
     public static <T> PagedResponse<T> fromPage(Page<T> page) {
         return new PagedResponse<>(
                 page.getNumber(),

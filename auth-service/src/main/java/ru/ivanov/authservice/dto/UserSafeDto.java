@@ -7,6 +7,6 @@ public record UserSafeDto(
         String username,
         String firstName,
         String lastName,
-        boolean isAdmin
+        boolean isAdmin // todo убрать
 ) {
 }

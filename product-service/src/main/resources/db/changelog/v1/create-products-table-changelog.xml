@@ -26,7 +26,14 @@
             <column name="price" type="numeric">
                 <constraints nullable="false"/>
             </column>
+            <column name="quantity" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seller_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
+
         <rollback>
             <dropTable tableName="products"/>
         </rollback>

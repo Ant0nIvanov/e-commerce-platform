@@ -21,6 +21,8 @@
             <column name="name" type="string"/>
             <column name="description" type="string"/>
             <column name="price" type="numeric"/>
+            <column name="quantity" type="integer"/>
+            <column name="seller_id" type="uuid"/>
         </loadData>
 
         <rollback>

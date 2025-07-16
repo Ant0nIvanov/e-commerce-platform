@@ -32,7 +32,7 @@ public class RefreshToken {
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
     public RefreshToken(UUID userId, String token, Instant expiryDate) {

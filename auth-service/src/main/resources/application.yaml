@@ -3,11 +3,32 @@ server:
 
 
 spring:
+  config:
+    activate:
+      on-profile: default
+
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/E-commerce_Platform_Datasource
+    url: jdbc:postgresql://localhost:5438/auth-service-db
     username: username
     password: password
+
+  data:
+    redis:
+      host: localhost
+      port: 6383
+
+  kafka:
+    bootstrap-servers: localhost:9092
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      acks: all
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "ru.ivanov.common.*"
 
   jpa:
     open-in-view: false
@@ -20,7 +41,9 @@ spring:
         format_sql: true
 
   liquibase:
-    enabled: false
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
   application:
     name: auth-service
 
@@ -28,7 +51,7 @@ jwt:
   issuer: auth-service
   access:
     secret: 5ba1791dedb87fec844cd4c57bcf5c3afeb0379f4b67347a438bc559b429a52c
-    ttl: 1m
+    ttl: 10m
   refresh:
     secret: 4cfa6d5afcaef760b96163d923c05a4d7c85957acbca06649d28b21576859f1c
     ttl: 1d

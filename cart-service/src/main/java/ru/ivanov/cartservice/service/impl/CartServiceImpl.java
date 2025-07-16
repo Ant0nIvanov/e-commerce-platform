@@ -2,58 +2,68 @@ package ru.ivanov.cartservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ivanov.cartservice.client.ProductClient;
-import ru.ivanov.cartservice.dto.CartDto;
 import ru.ivanov.cartservice.dto.ProductDto;
 import ru.ivanov.cartservice.dto.ProductInCartDto;
 import ru.ivanov.cartservice.exception.CartNotFoundException;
 import ru.ivanov.cartservice.exception.ProductNotFoundException;
-import ru.ivanov.cartservice.mapper.CartMapper;
 import ru.ivanov.cartservice.model.Cart;
 import ru.ivanov.cartservice.model.CartItem;
-import ru.ivanov.cartservice.repository.CartItemRepository;
 import ru.ivanov.cartservice.repository.CartRepository;
-import ru.ivanov.cartservice.service.CartEntityService;
 import ru.ivanov.cartservice.service.CartItemService;
 import ru.ivanov.cartservice.service.CartService;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.ivanov.cartservice.util.MessageUtils.*;
+import static ru.ivanov.cartservice.util.MessageUtils.CART_NOT_FOUND;
+import static ru.ivanov.cartservice.util.MessageUtils.PRODUCT_NOT_FOUND;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
+    @Lazy
+    @Autowired
+    private CartService self;
+    private final CartRepository cartRepository;
+    private final CartItemService cartItemService;
+    private final ProductClient productClient;
+    private final CacheManager cacheManager;
 
-    private final CartEntityService cartEntityService;
-    public final CartRepository cartRepository;
-    public final CartItemRepository cartItemRepository;
-    public final CartItemService cartItemService;
-    public final ProductClient productClient;
-    public final CartMapper cartMapper;
-    public final CacheManager cacheManager;
+    private static final String CART_CACHE_NAME = "cart-service:carts";
+    private static final String PRODUCT_CACHE_NAME = "cart-service:products";
 
     @Override
-    @CachePut(value = "cartDtos", key = "#userId")
+    @CachePut(value = CART_CACHE_NAME, key = "#userId")
     @Transactional
-    public CartDto createCart(UUID userId) {
+    public Cart createCart(UUID userId) {
         Cart cart = new Cart(userId);
         cartRepository.save(cart);
-        return cartMapper.toDto(cart);
+        return cart;
+    }
+
+    @Override
+    @Cacheable(value = CART_CACHE_NAME, key = "#userId")
+    @Transactional(readOnly = true)
+    public Cart getCart(UUID userId) {
+        return cartRepository.findCartByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException(CART_NOT_FOUND.formatted(userId)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductInCartDto> getCartWithItems(UUID userId) {
-        Cart cart = cartEntityService.getCart(userId);
+    public List<ProductInCartDto> getCartItems(UUID userId) {
+        Cart cart = self.getCart(userId);
 
         List<CartItem> cartItems = cartItemService.getAllItemsByCartId(cart.getId());
 
@@ -69,7 +79,7 @@ public class CartServiceImpl implements CartService {
             return Collections.emptyList();
         }
 
-        Cache cache = cacheManager.getCache("products");
+        Cache cache = cacheManager.getCache(PRODUCT_CACHE_NAME);
 
         if (cache == null) {
            return productClient.getProducts(productsIDs).stream()
@@ -117,14 +127,16 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public void addProductToCart(UUID userId, UUID productId) {
-        if (!productClient.isProductExists(productId)) {
-            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
-        }
+    public ProductInCartDto addItemToCart(UUID userId, UUID productId) {
+//        if (!productClient.isProductExists(productId)) {
+//            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
+//        }
 
-        Cart cart = cartEntityService.getCart(userId);
+        Cart cart = self.getCart(userId);
 
         CartItem item = cartItemService.getCartItem(cart.getId(), productId);
+
+        ProductDto product = productClient.getProduct(productId);
 
         if (item == null) {
             item = new CartItem(cart.getId(), productId);
@@ -132,37 +144,41 @@ public class CartServiceImpl implements CartService {
 
         item.incrementQuantity();
         cartItemService.save(item);
+        return new ProductInCartDto(item.getProductId(), product.name(), product.price(), item.getQuantity());
     }
 
     @Override
     @Transactional
-    public void decreaseProductQuantityInCart(UUID userId, UUID productId) {
-        if (!productClient.isProductExists(productId)) {
-            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
-        }
+    public ProductInCartDto decreaseItemQuantityInCart(UUID userId, UUID productId) {
+//        if (!productClient.isProductExists(productId)) {
+//            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
+//        }
 
-        Cart cart = cartEntityService.getCart(userId);
+        Cart cart = self.getCart(userId);
 
         CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
+
+        ProductDto product = productClient.getProduct(productId);
 
         item.decreaseQuantity();
 
         if (item.getQuantity() == 0) {
             cartItemService.delete(item);
-            return;
+            return new ProductInCartDto(item.getProductId(), product.name(), product.price(), item.getQuantity());
         }
 
         cartItemService.save(item);
+        return new ProductInCartDto(item.getProductId(), product.name(), product.price(), item.getQuantity());
     }
 
     @Override
     @Transactional
-    public void removeProductFromCart(UUID userId, UUID productId) {
-        if (!productClient.isProductExists(productId)) {
-            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
-        }
+    public void removeItemFromCart(UUID userId, UUID productId) {
+//        if (!productClient.isProductExists(productId)) {
+//            throw new ProductNotFoundException(PRODUCT_NOT_FOUND.formatted(productId));
+//        }
 
-        Cart cart = cartEntityService.getCart(userId);
+        Cart cart = self.getCart(userId);
 
         CartItem item = cartItemService.getCartItemOrThrow(cart.getId(), productId);
 
@@ -170,12 +186,18 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @CacheEvict(value = "carts", key = "#userId")
     @Transactional
-    public void deleteCart(UUID userId) {
-        if (!cartRepository.existsByUserId(userId)) {
-            throw new CartNotFoundException(CART_NOT_FOUND.formatted(userId));
-        }
-        cartRepository.deleteByUserId(userId);
+    public void removeAllItemsFromCart(UUID userId) {
+        Cart cart = self.getCart(userId);
+        cartItemService.deleteAllItems(cart.getId());
+    }
+
+    @Override
+    @CacheEvict(value = CART_CACHE_NAME, key = "#userId")
+    @Transactional
+    public void deleteCartAndAllItems(UUID userId) {
+        Cart cart = self.getCart(userId);
+        cartItemService.deleteAllItems(cart.getId());
+        cartRepository.delete(cart);
     }
 }

@@ -9,13 +9,21 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 
 spring:
+  config:
+    activate:
+      on-profile: default
   application:
     name: cart-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/E-commerce_Platform_Datasource
+    url: jdbc:postgresql://localhost:5436/cart-service-db
     username: username
     password: password
+
+  data:
+    redis:
+      host: localhost
+      port: 6381
 
   jpa:
     open-in-view: false
@@ -31,10 +39,14 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "ru.ivanov.common.*"
+
 jwt:
   access:
     secret: 5ba1791dedb87fec844cd4c57bcf5c3afeb0379f4b67347a438bc559b429a52c
-
-#product:
-#  service:
-#    url: http://localhost:8081/api/v1/products

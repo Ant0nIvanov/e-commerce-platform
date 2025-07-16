@@ -11,6 +11,7 @@ import ru.ivanov.cartservice.dto.response.ErrorResponse;
 import ru.ivanov.cartservice.exception.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -74,7 +75,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
-        log.error(ex.toString());
+        log.error("error", ex);
         ErrorResponse errorResponse = new ErrorResponse(
                 request.getRequestURI(),
                 ex.getMessage(),

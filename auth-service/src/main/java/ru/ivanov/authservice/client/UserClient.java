@@ -34,7 +34,7 @@ public class UserClient {
     private final JWTUtils jwtUtils;
     private final AuthInterface authInterface;
 
-    @CachePut(value = "users", key = "#result.id")
+    @CachePut(value = "auth-service:users", key = "#result.id")
     public UserDto createNewUser(RegistrationRequest request) {
         String serviceToken = jwtUtils.generateServiceToken(null);
 
@@ -60,7 +60,7 @@ public class UserClient {
         }
     }
 
-    @CachePut(value = "users", key = "#result.id")
+    @Cacheable(value = "auth-service:users", key = "#request.username")
     public UserDto verifyCredentials(LoginRequest request) {
         String serviceToken = jwtUtils.generateServiceToken(null);
 
@@ -69,6 +69,7 @@ public class UserClient {
             ResponseEntity<UserDto> response = authInterface.verifyCredentials(authHeader, request);
 
             if (response.getStatusCode() == HttpStatus.OK) {
+                System.out.println(response.getBody());
                 return response.getBody();
             } else {
                 throw new RuntimeException("Failed to verify credentials. Status: " + response.getStatusCode());
@@ -78,7 +79,7 @@ public class UserClient {
         }
     }
 
-    @Cacheable(value = "users", key = "#userId")
+    @Cacheable(value = "user-service:users", key = "#userId")
     public UserDto getUserById(UUID userId) {
         String serviceToken = jwtUtils.generateServiceToken(userId);
 

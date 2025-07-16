@@ -1,107 +1,144 @@
 services:
 
-  datasource:
-    image: postgres:17-alpine
-    container_name: Datasource_Container
-    environment:
-      POSTGRES_DB: E-commerce_Platform_Datasource
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: password
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: Redis-Insight
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U username -d E-commerce_Platform_Datasource" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      - "5540:5540"
     volumes:
-      - e-commerce_platform_data:/var/lib/postgresql/data
+      - redis-insight:/data
+
+
 
   product-service:
-    container_name: Product-Service_Container
+    container_name: Product-Service
     build:
       context: product-service/.
       dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 15s
       timeout: 10s
       retries: 15
       start_period: 60s
     depends_on:
-      datasource:
+      product-service-db:
+        condition: service_healthy
+      product-service-redis:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
-      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_URL: jdbc:postgresql://product-service-db:5432/product-service-db
       SPRING_DATASOURCE_USERNAME: username
       SPRING_DATASOURCE_PASSWORD: password
+      REDIS_HOST: product-service-redis
+      REDIS_PORT: 6379
+
+
+  product-service-db:
+    image: postgres:17-alpine
+    container_name: Product-Service-DB
+    environment:
+      POSTGRES_DB: product-service-db
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U username -d product-service-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - product-service-db-data:/var/lib/postgresql/data
+
+  product-service-redis:
+    image: redis:alpine
+    container_name: Product-Service-Redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - product-service-redis-data:/data
+
+
+
+
 
   cart-service:
-    container_name: Cart-Service_Container
+    container_name: Cart-Service
     build:
       context: cart-service/.
       dockerfile: Dockerfile
-    ports:
-      - "8083:8083"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8083/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
     depends_on:
-      datasource:
+      cart-service-db:
+        condition: service_healthy
+      cart-service-redis:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
-      user-service:
-        condition: service_healthy
-      product-service:
-        condition: service_healthy
     environment:
-      PRODUCT_SERVICE_URL: http://product-service:8081/api/v1/products
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
-      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_URL: jdbc:postgresql://cart-service-db:5432/cart-service-db
       SPRING_DATASOURCE_USERNAME: username
       SPRING_DATASOURCE_PASSWORD: password
+      REDIS_HOST: cart-service-redis
+      REDIS_PORT: 6379
+
+  cart-service-db:
+    image: postgres:17-alpine
+    container_name: Cart-Service-DB
+    environment:
+      POSTGRES_DB: cart-service-db
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U username -d cart-service-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - cart-service-db-data:/var/lib/postgresql/data
+
+  cart-service-redis:
+    image: redis:alpine
+    container_name: Cart-Service-Redis
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - cart-service-redis-data:/data
+
+
+
+
+
 
   user-service:
-    container_name: User-Service_Container
+    container_name: User-Service
     build:
       context: user-service/.
       dockerfile: Dockerfile
-    ports:
-      - "8084:8084"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8084/actuator/health" ]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
-    depends_on:
-      datasource:
-          condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
-      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
-      SPRING_DATASOURCE_USERNAME: username
-      SPRING_DATASOURCE_PASSWORD: password
-
-  auth-service:
-    container_name: Auth-Service_Container
-    build:
-      context: auth-service/.
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
@@ -109,16 +146,113 @@ services:
       start_period: 30s
       timeout: 10s
     depends_on:
-      datasource:
+      user-service-db:
+          condition: service_healthy
+      user-service-redis:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
     environment:
-      USER_SERVICE_URL: http://user-service:8084/api/v1/users
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
-      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
+      SPRING_DATASOURCE_URL: jdbc:postgresql://user-service-db:5432/user-service-db
       SPRING_DATASOURCE_USERNAME: username
       SPRING_DATASOURCE_PASSWORD: password
+
+  user-service-db:
+    image: postgres:17-alpine
+    container_name: User-Service-DB
+    environment:
+      POSTGRES_DB: user-service-db
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5437:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U username -d user-service-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - user-service-db-data:/var/lib/postgresql/data
+
+# у user-service пока нет кеширования
+  user-service-redis:
+    image: redis:alpine
+    container_name: User-Service-Redis
+    ports:
+      - "6382:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - user-service-redis-data:/data
+
+
+
+
+  auth-service:
+    container_name: Auth-Service
+    build:
+      context: auth-service/.
+      dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      auth-service-db:
+        condition: service_healthy
+      auth-service-redis:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-service-db:5432/auth-service-db
+      SPRING_DATASOURCE_USERNAME: username
+      SPRING_DATASOURCE_PASSWORD: password
+      REDIS_HOST: auth-service-redis
+      REDIS_PORT: 6379
+
+  auth-service-db:
+    image: postgres:17-alpine
+    container_name: Auth-Service-DB
+    environment:
+      POSTGRES_DB: auth-service-db
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5438:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U username -d cart-service-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - auth-service-db-data:/var/lib/postgresql/data
+
+  auth-service-redis:
+    image: redis:alpine
+    container_name: Auth-Service-Redis
+    ports:
+      - "6383:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - auth-service-redis-data:/data
+
+
+
+
 
   page-service:
     container_name: Page-Service_Container
@@ -133,15 +267,6 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-# todo убрать доступ в бд
-    depends_on:
-      datasource:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
-      SPRING_DATASOURCE_URL: jdbc:postgresql://datasource:5432/E-commerce_Platform_Datasource
-      SPRING_DATASOURCE_USERNAME: username
-      SPRING_DATASOURCE_PASSWORD: password
 
   eureka-server:
     container_name: Eureka-Server_Container
@@ -150,6 +275,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
       interval: 10s
@@ -164,6 +291,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8765:8765"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8765/actuator/health" ]
       interval: 10s
@@ -174,5 +303,19 @@ services:
       eureka-server:
         condition: service_healthy
 
+  kafka:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+    
 volumes:
-  e-commerce_platform_data:
+  product-service-db-data:
+  product-service-redis-data:
+  cart-service-db-data:
+  cart-service-redis-data:
+  user-service-db-data:
+  user-service-redis-data:
+  auth-service-db-data:
+  auth-service-redis-data:
+
+  redis-insight:

@@ -1,0 +1,15 @@
+server:
+  port: 8181
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+  application:
+    name: page-service
+
+  liquibase:
+    enabled: false
+  web:
+    resources:
+      static-locations: classpath:/static/
